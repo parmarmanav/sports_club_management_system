@@ -6,10 +6,10 @@ import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import Courts from './pages/courts/Courts';
+import CourtDetails from './pages/courts/CourtDetails';
 
 // Placeholder Pages for future commits
-const Courts = () => <div className="p-8">Courts Page Placeholder</div>;
-const CourtDetails = () => <div className="p-8">Court Details Placeholder</div>;
 const BookCourt = () => <div className="p-8">Book Court Placeholder</div>;
 
 const MemberDashboard = () => <div className="p-8">Member Dashboard Placeholder</div>;
