@@ -3,6 +3,9 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 
+import membersRouter from './src/routes/v1/members.js';
+import leadsRouter from './src/routes/v1/leads.js';
+
 dotenv.config();
 
 const app = express();
@@ -18,6 +21,27 @@ app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'Backend is running'
+  });
+});
+
+// API Routes
+app.use('/api/v1/members', membersRouter);
+app.use('/api/v1/leads', leadsRouter);
+
+// 404 Not Found handling
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// Global Error handling
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error'
   });
 });
 
