@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Users, ArrowRight } from 'lucide-react';
 import useApi from '../../hooks/useApi';
 import { sportsApi, slotsApi } from '../../api/bookings';
 import { Link } from 'react-router-dom';
@@ -24,88 +24,148 @@ export default function CourtsPublicPage() {
     setDate(d.toISOString().split('T')[0]);
   };
 
+  // Pre-select first sport if loaded and none selected
+  if (sports.length > 0 && !sportId) {
+    setSportId(sports[0].id);
+  }
+
   return (
-    <div className="page-enter">
-      <section className="relative py-24 bg-brand-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-brand-accent-light font-medium text-sm tracking-widest uppercase mb-3">Book</p>
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">Court Availability</h1>
-          <p className="text-slate-400 max-w-lg mx-auto">Check available slots and plan your next session.</p>
+    <div className="page-enter bg-brand-surface min-h-screen">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden pt-28 pb-20 bg-brand-primary">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-brand-accent/20 blur-[120px]" />
+          <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[100px]" />
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+          <span className="inline-block py-1 px-3 rounded-full bg-brand-accent/20 border border-brand-accent/30 text-brand-accent-light text-xs font-bold tracking-widest uppercase mb-6">
+            Book a session
+          </span>
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-white mb-6 tracking-tight">
+            Reserve Your <span className="text-gradient">Court</span>
+          </h1>
+          <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Experience premium facilities. Choose your sport, pick a time, and secure your spot at Champions Club.
+          </p>
         </div>
       </section>
 
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Sport selector */}
-          <div className="flex flex-wrap gap-3 justify-center mb-8">
+      {/* Main Content */}
+      <section className="relative -mt-10 pb-24 z-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="glass-dark rounded-2xl p-2 sm:p-3 mb-10 flex flex-wrap justify-center gap-2 max-w-fit mx-auto shadow-2xl">
             {sports.map(s => (
               <button key={s.id} onClick={() => setSportId(s.id)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
-                  sportId === s.id ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-brand-border text-slate-600 hover:border-slate-300'
-                }`}>{s.name}</button>
+                className={`px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  sportId === s.id 
+                    ? 'bg-gradient-to-r from-brand-accent to-emerald-600 text-white shadow-[0_0_15px_rgba(13,148,136,0.4)]' 
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                }`}>
+                {s.name}
+              </button>
             ))}
           </div>
 
           {sportId && (
-            <>
-              {/* Date picker */}
-              <div className="flex items-center justify-center gap-4 mb-8">
-                <button onClick={() => shiftDate(-1)} className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <div className="flex items-center gap-2 bg-brand-surface px-4 py-2.5 rounded-xl border border-brand-border">
-                  <Calendar className="w-4 h-4 text-brand-muted" />
-                  <input type="date" value={date} min={today} onChange={(e) => setDate(e.target.value)}
-                    className="text-sm font-medium text-slate-800 bg-transparent focus:outline-none" />
+            <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+              
+              {/* Date Control */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-10 border-b border-slate-100 pb-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800">Select Date & Time</h2>
+                  <p className="text-sm text-slate-500 mt-1">Real-time availability for courts</p>
                 </div>
-                <button onClick={() => shiftDate(1)} className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
-                  <ChevronRight className="w-5 h-5" />
-                </button>
+                
+                <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
+                  <button onClick={() => shiftDate(-1)} className="p-2.5 text-slate-500 hover:text-slate-900 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <div className="flex items-center gap-2 px-3">
+                    <Calendar className="w-4 h-4 text-brand-accent" />
+                    <input type="date" value={date} min={today} onChange={(e) => setDate(e.target.value)}
+                      className="text-sm font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer" />
+                  </div>
+                  <button onClick={() => shiftDate(1)} className="p-2.5 text-slate-500 hover:text-slate-900 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
-              {/* Availability */}
+              {/* Availability Grid */}
               {loading ? (
-                <div className="text-center py-16 text-brand-muted text-sm">Loading availability...</div>
+                <div className="flex flex-col items-center justify-center py-20 text-brand-muted">
+                  <div className="w-10 h-10 border-4 border-slate-200 border-t-brand-accent rounded-full animate-spin mb-4"></div>
+                  <p className="text-sm font-medium animate-pulse">Loading real-time availability...</p>
+                </div>
               ) : availability.length === 0 ? (
-                <div className="text-center py-16 text-brand-muted text-sm">
-                  <Calendar className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                  <p>No courts available for this sport on this date.</p>
+                <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-4">
+                    <Calendar className="w-6 h-6 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-700 mb-1">No courts available</h3>
+                  <p className="text-sm text-slate-500">All slots are fully booked for this date. Try selecting another date.</p>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {availability.map(court => (
-                    <div key={court.court_id} className="bg-brand-surface rounded-2xl border border-brand-border p-6">
-                      <h3 className="font-semibold text-slate-800 mb-4">{court.court_name}</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {court.slots?.map((slot, i) => (
-                          <div key={i}
-                            className={`px-4 py-2.5 rounded-lg text-sm font-medium border transition-all ${
-                              slot.is_available
-                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                : 'border-slate-200 bg-slate-100 text-slate-400 line-through'
-                            }`}>
-                            {new Date(slot.start).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                            {slot.is_available && slot.is_social && ' 🤝'}
-                          </div>
-                        ))}
+                <div className="space-y-8">
+                  {availability.map((court, index) => (
+                    <div key={court.court_id} className="group" style={{ animationDelay: `${index * 100}ms` }}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-2 h-8 bg-brand-accent rounded-full"></div>
+                        <h3 className="text-lg font-bold text-slate-800">{court.court_name}</h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                        {court.slots?.map((slot, i) => {
+                          const timeString = new Date(slot.start).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                          return (
+                            <div key={i}
+                              className={`relative overflow-hidden px-1 py-3 rounded-xl text-center border-2 transition-all duration-300 ${
+                                slot.is_available
+                                  ? slot.is_social 
+                                      ? 'border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 hover:border-indigo-300' 
+                                      : 'border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 hover-lift'
+                                  : 'border-slate-100 bg-slate-50 opacity-60'
+                              }`}>
+                              
+                              <p className={`text-sm font-bold ${slot.is_available ? 'text-slate-800' : 'text-slate-400 line-through'}`}>
+                                {timeString}
+                              </p>
+                              
+                              {slot.is_available && (
+                                <div className="mt-1 flex justify-center items-center gap-1">
+                                  {slot.is_social ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-100 px-1.5 py-0.5 rounded-md">
+                                      <Users className="w-3 h-3" /> Social
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                                      <Clock className="w-3 h-3" /> 60m
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
 
-                  <div className="text-center pt-4">
-                    <Link to="/login" className="inline-flex items-center gap-2 bg-brand-accent text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-brand-accent/90 transition-all">
-                      Sign in to Book
+                  <div className="mt-12 p-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-accent/20 rounded-full blur-3xl"></div>
+                    <div className="relative z-10 text-center sm:text-left">
+                      <h4 className="text-xl font-bold text-white mb-2">Ready to play?</h4>
+                      <p className="text-slate-400 text-sm">Sign in to book these slots and manage your reservations.</p>
+                    </div>
+                    <Link to="/login" className="relative z-10 flex items-center gap-2 bg-white text-slate-900 px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-slate-100 hover-lift hover-glow transition-all">
+                      Sign in to Book <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>
               )}
-            </>
-          )}
-
-          {!sportId && (
-            <div className="text-center py-16 text-brand-muted text-sm">
-              <p className="text-4xl mb-3">🎾</p>
-              <p>Select a sport above to view court availability.</p>
             </div>
           )}
         </div>

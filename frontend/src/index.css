@@ -2,22 +2,22 @@
 
 @theme {
   /* ─── Brand palette: clean, professional, neutral ─── */
-  --color-brand-primary: #1e293b;     /* slate-800 — primary brand */
-  --color-brand-accent: #0f766e;      /* teal-700 — accent/CTA */
+  --color-brand-primary: #0f172a;     /* slate-900 — primary brand */
+  --color-brand-accent: #0d9488;      /* teal-600 — accent/CTA */
   --color-brand-accent-light: #14b8a6; /* teal-500 — hover accent */
   --color-brand-surface: #f8fafc;     /* slate-50 — page background */
   --color-brand-card: #ffffff;        /* white — card surfaces */
   --color-brand-muted: #64748b;       /* slate-500 — muted text */
   --color-brand-border: #e2e8f0;      /* slate-200 — borders */
-  --color-brand-sidebar: #0f172a;     /* slate-900 — admin sidebar */
-  --color-brand-sidebar-hover: #1e293b; /* slate-800 */
+  --color-brand-sidebar: #020617;     /* slate-950 — admin sidebar */
+  --color-brand-sidebar-hover: #0f172a; /* slate-900 */
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-brand-surface text-slate-800 font-sans antialiased;
+    @apply bg-brand-surface text-slate-800 font-sans antialiased selection:bg-brand-accent/20 selection:text-brand-accent;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -28,29 +28,51 @@
 @layer utilities {
   /* Smooth page entrance animation */
   .page-enter {
-    animation: pageEnter 0.3s ease-out;
+    animation: pageEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes pageEnter {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(12px) scale(0.99);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
   }
 
-  /* Custom scrollbar for admin sidebar */
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
+  }
+  
+  .glass-dark {
+    @apply bg-slate-900/70 backdrop-blur-md border border-slate-700/50 shadow-xl;
+  }
+
+  /* Micro-animations */
+  .hover-lift {
+    @apply transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 ease-out hover:shadow-[0_0_20px_rgba(13,148,136,0.3)];
+  }
+
+  /* Custom scrollbar */
   .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.15);
-    border-radius: 999px;
+    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  }
+  
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-accent to-emerald-500;
   }
 }
