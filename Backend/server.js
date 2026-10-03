@@ -9,6 +9,8 @@ import sportsRouter from './src/routes/v1/sports.js';
 import courtsRouter from './src/routes/v1/courts.js';
 import slotsRouter from './src/routes/v1/slots.js';
 import bookingsRouter from './src/routes/v1/bookings.js';
+import shopRouter from './src/routes/v1/shop.js';
+import barRouter from './src/routes/v1/bar.js';
 
 dotenv.config();
 
@@ -35,6 +37,8 @@ app.use('/api/v1/sports', sportsRouter);
 app.use('/api/v1/courts', courtsRouter);
 app.use('/api/v1/slots', slotsRouter);
 app.use('/api/v1/bookings', bookingsRouter);
+app.use('/api/v1/shop', shopRouter);
+app.use('/api/v1/bar', barRouter);
 
 // 404 Not Found handling
 app.use((req, res, next) => {

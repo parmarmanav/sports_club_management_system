@@ -1,6 +1,6 @@
 import express from 'express';
 import { supabase } from '../../config/supabase.js';
-import { verifySupabaseToken } from '../../middleware/auth.js';
+import { verifySupabaseToken, authorizeRoles } from '../../middleware/auth.js';
 
 const router = express.Router();
 
@@ -184,6 +184,65 @@ router.post('/orders/:id/close', verifySupabaseToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error closing bar tab:', error);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+});
+// 7. Kitchen Orders (KDS)
+router.get('/kitchen', verifySupabaseToken, authorizeRoles('admin', 'manager', 'kitchen_staff', 'bar_staff'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('bar_order_items')
+      .select(`
+        *,
+        bar_orders (
+          table_id,
+          bar_tables (
+            table_number
+          )
+        ),
+        bar_menu_items (
+          name
+        )
+      `)
+      .neq('kitchen_status', 'served')
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching kitchen orders:', error);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+});
+
+// 8. Update Kitchen Status
+router.patch('/kitchen/:item_id', verifySupabaseToken, authorizeRoles('admin', 'manager', 'kitchen_staff', 'bar_staff'), async (req, res) => {
+  try {
+    const { item_id } = req.params;
+    const { kitchen_status } = req.body;
+
+    const allowedStatuses = ['ordered', 'preparing', 'ready', 'served'];
+    if (!kitchen_status || !allowedStatuses.includes(kitchen_status)) {
+      return res.status(400).json({ success: false, message: 'Valid kitchen_status is required' });
+    }
+
+    const { data, error } = await supabase
+      .from('bar_order_items')
+      .update({ kitchen_status, updated_at: new Date().toISOString() })
+      .eq('id', item_id)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ success: false, message: 'Order item not found' });
+      }
+      throw error;
+    }
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating kitchen status:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 });
