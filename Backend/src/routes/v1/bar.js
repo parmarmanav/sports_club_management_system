@@ -188,7 +188,7 @@ router.post('/orders/:id/close', verifySupabaseToken, async (req, res) => {
   }
 });
 // 7. Kitchen Orders (KDS)
-router.get('/kitchen', verifySupabaseToken, authorizeRoles('admin', 'manager', 'kitchen_staff', 'bar_staff'), async (req, res) => {
+router.get('/kitchen', verifySupabaseToken, authorizeRoles('admin', 'manager', 'kitchen_staff', 'bar_staff', 'owner'), async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('bar_order_items')
@@ -245,6 +245,12 @@ router.patch('/kitchen/:item_id', verifySupabaseToken, authorizeRoles('admin', '
     console.error('Error updating kitchen status:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
+});
+
+
+router.get('/kitchen', async (req, res) => {
+  const { data } = await supabase.from('bar_orders').select('*, members(full_name), staff(full_name)');
+  res.json({ success: true, data: data || [] });
 });
 
 export default router;

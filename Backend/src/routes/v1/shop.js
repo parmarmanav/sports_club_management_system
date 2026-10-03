@@ -199,4 +199,10 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
   }
 });
 
+
+router.get('/orders', async (req, res) => {
+  const { data } = await supabase.from('shop_orders').select('*, members(full_name), staff(full_name)');
+  res.json({ success: true, data: data || [] });
+});
+
 export default router;

@@ -148,4 +148,10 @@ router.post('/:id/cancel', verifySupabaseToken, async (req, res) => {
   }
 });
 
+
+router.get('/', async (req, res) => {
+  const { data } = await supabase.from('bookings').select('*, members(full_name), staff(full_name)');
+  res.json({ success: true, data: data || [] });
+});
+
 export default router;

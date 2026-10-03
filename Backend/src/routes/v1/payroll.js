@@ -75,4 +75,10 @@ router.post('/generate', async (req, res) => {
   }
 });
 
+
+router.get('/', async (req, res) => {
+  const { data } = await supabase.from('payroll').select('*, staff(full_name)');
+  res.json({ success: true, data: data || [] });
+});
+
 export default router;

@@ -152,4 +152,10 @@ router.post('/:id/pay', async (req, res) => {
   }
 });
 
+
+router.get('/', async (req, res) => {
+  const { data } = await supabase.from('invoices').select('*, members(full_name)');
+  res.json({ success: true, data: data || [] });
+});
+
 export default router;
