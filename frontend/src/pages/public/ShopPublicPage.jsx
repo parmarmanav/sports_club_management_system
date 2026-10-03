@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Search, Package } from 'lucide-react';
+import { Search, Package, ArrowRight } from 'lucide-react';
 import useApi from '../../hooks/useApi';
 import { shopApi } from '../../api/shop';
 import { formatCurrency } from '../../utils/formatters';
+import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 export default function ShopPublicPage() {
+  const { user } = useAuth();
   const { data: productsData, loading } = useApi(() => shopApi.getProducts({ in_stock: true }));
   const products = productsData || [];
   const [search, setSearch] = useState('');
@@ -56,6 +59,19 @@ export default function ShopPublicPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {!user && (
+            <div className="mt-12 p-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-accent/20 rounded-full blur-3xl"></div>
+              <div className="relative z-10 text-center sm:text-left">
+                <h4 className="text-xl font-bold text-white mb-2">Ready to purchase?</h4>
+                <p className="text-slate-400 text-sm">Sign in to buy items and manage your orders.</p>
+              </div>
+              <Link to="/login" className="relative z-10 flex items-center gap-2 bg-white text-slate-900 px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all">
+                Sign in to Purchase <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           )}
         </div>

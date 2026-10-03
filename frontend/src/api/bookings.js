@@ -30,7 +30,7 @@ export const sportsApi = {
       data: [
         { id: 'sport-1', name: 'Tennis' },
         { id: 'sport-2', name: 'Padel' },
-        { id: 'sport-3', name: 'Squash' }
+        { id: 'sport-3', name: 'Badminton' }
       ]
     }), 300));
   },
@@ -40,7 +40,7 @@ const MOCK_COURTS = [
   { id: 'court-1', sport_id: 'sport-1', name: 'Center Court (Tennis)' },
   { id: 'court-2', sport_id: 'sport-1', name: 'Court 2 (Tennis)' },
   { id: 'court-3', sport_id: 'sport-2', name: 'Padel Pro 1' },
-  { id: 'court-4', sport_id: 'sport-3', name: 'Squash Glass Court' }
+  { id: 'court-4', sport_id: 'sport-3', name: 'Badminton Glass Court' }
 ];
 
 export const courtsApi = {

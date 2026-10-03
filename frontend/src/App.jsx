@@ -14,6 +14,7 @@ import ContactPage from './pages/public/ContactPage';
 import PlansPage from './pages/public/PlansPage';
 import CourtsPublicPage from './pages/public/CourtsPublicPage';
 import ShopPublicPage from './pages/public/ShopPublicPage';
+import BarPublicPage from './pages/public/BarPublicPage';
 
 // Admin pages
 import DashboardPage from './pages/admin/DashboardPage';
@@ -50,6 +51,7 @@ function App() {
             <Route path="/facilities" element={<FacilitiesPage />} />
             <Route path="/courts" element={<CourtsPublicPage />} />
             <Route path="/shop" element={<ShopPublicPage />} />
+            <Route path="/bar" element={<BarPublicPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/plans" element={<PlansPage />} />
             <Route path="/contact" element={<ContactPage />} />

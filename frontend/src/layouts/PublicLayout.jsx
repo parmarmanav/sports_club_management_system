@@ -10,15 +10,18 @@ const PublicLayout = () => {
   const { user, logout } = useAuth();
 
   const links = [
-    { name: 'About', href: '/about' },
-    { name: 'Facilities', href: '/facilities' },
     { name: 'Courts', href: '/courts' },
     { name: 'Shop', href: '/shop' },
-    { name: 'Gallery', href: '/gallery' },
+    { name: 'Bar', href: '/bar' },
     { name: 'Contact', href: '/contact' },
   ];
 
-  const isActive = (href) => location.pathname === href;
+  const isActive = (href) => {
+    if (href.includes('#')) {
+      return location.pathname === '/' && location.hash === href.split('#')[1];
+    }
+    return location.pathname === href;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-800">
@@ -191,7 +194,7 @@ const PublicLayout = () => {
             <div>
               <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-slate-300">Navigate</h4>
               <ul className="space-y-2.5">
-                {[{ n: 'About Us', h: '/about' }, { n: 'Facilities', h: '/facilities' }, { n: 'Book Courts', h: '/courts' }, { n: 'Shop', h: '/shop' }, { n: 'Contact', h: '/contact' }].map(l => (
+                {[{ n: 'About Us', h: '/#about' }, { n: 'Facilities', h: '/#facilities' }, { n: 'Book Courts', h: '/courts' }, { n: 'Shop', h: '/shop' }, { n: 'Contact', h: '/contact' }].map(l => (
                   <li key={l.h}>
                     <Link to={l.h} className="text-slate-400 hover:text-brand-accent-light transition-colors text-sm">{l.n}</Link>
                   </li>
