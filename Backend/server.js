@@ -11,6 +11,12 @@ import slotsRouter from './src/routes/v1/slots.js';
 import bookingsRouter from './src/routes/v1/bookings.js';
 import shopRouter from './src/routes/v1/shop.js';
 import barRouter from './src/routes/v1/bar.js';
+import dashboardRouter from './src/routes/v1/dashboard.js';
+import staffRouter from './src/routes/v1/staff.js';
+import shiftsRouter from './src/routes/v1/shifts.js';
+import leaveRouter from './src/routes/v1/leave.js';
+import payrollRouter from './src/routes/v1/payroll.js';
+import invoicesRouter from './src/routes/v1/invoices.js';
 
 dotenv.config();
 
@@ -39,6 +45,12 @@ app.use('/api/v1/slots', slotsRouter);
 app.use('/api/v1/bookings', bookingsRouter);
 app.use('/api/v1/shop', shopRouter);
 app.use('/api/v1/bar', barRouter);
+app.use('/api/v1/dashboard', dashboardRouter);
+app.use('/api/v1/staff', staffRouter);
+app.use('/api/v1/shifts', shiftsRouter);
+app.use('/api/v1/leave', leaveRouter);
+app.use('/api/v1/payroll', payrollRouter);
+app.use('/api/v1/invoices', invoicesRouter);
 
 // 404 Not Found handling
 app.use((req, res, next) => {
