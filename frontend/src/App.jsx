@@ -9,14 +9,21 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import MembersPage from './pages/admin/MembersPage';
 import NewMemberPage from './pages/admin/NewMemberPage';
+import MemberProfilePage from './pages/admin/MemberProfilePage';
 import LeadsPage from './pages/admin/LeadsPage';
 import BookingsPage from './pages/admin/BookingsPage';
+import NewBookingPage from './pages/admin/NewBookingPage';
 import ShopPOSPage from './pages/admin/ShopPOSPage';
+import ProductsPage from './pages/admin/ProductsPage';
+import OrdersPage from './pages/admin/OrdersPage';
 import BarPage from './pages/admin/BarPage';
 import KitchenPage from './pages/admin/KitchenPage';
 import StaffPage from './pages/admin/StaffPage';
+import ShiftsPage from './pages/admin/ShiftsPage';
 import LeavePage from './pages/admin/LeavePage';
 import PayrollPage from './pages/admin/PayrollPage';
+import InvoicesPage from './pages/admin/InvoicesPage';
+import ReportsPage from './pages/admin/ReportsPage';
 
 // Placeholder component for pages not yet built
 const Placeholder = ({ title, subtitle }) => (
@@ -66,15 +73,15 @@ function App() {
             {/* People */}
             <Route path="members" element={<MembersPage />} />
             <Route path="members/new" element={<NewMemberPage />} />
-            <Route path="members/:id" element={<Placeholder title="Member Profile" />} />
+            <Route path="members/:id" element={<MemberProfilePage />} />
             <Route path="leads" element={<LeadsPage />} />
 
             {/* Operations */}
             <Route path="bookings" element={<BookingsPage />} />
-            <Route path="bookings/new" element={<Placeholder title="New Booking" subtitle="Book a court" />} />
+            <Route path="bookings/new" element={<NewBookingPage />} />
             <Route path="shop" element={<ShopPOSPage />} />
-            <Route path="shop/products" element={<Placeholder title="Products" subtitle="Inventory management" />} />
-            <Route path="shop/orders" element={<Placeholder title="Orders" subtitle="Order history" />} />
+            <Route path="shop/products" element={<ProductsPage />} />
+            <Route path="shop/orders" element={<OrdersPage />} />
 
             {/* Bar & Dining */}
             <Route path="bar" element={<BarPage />} />
@@ -82,14 +89,13 @@ function App() {
 
             {/* HR & Staff */}
             <Route path="staff" element={<StaffPage />} />
-            <Route path="staff/shifts" element={<Placeholder title="Shifts" subtitle="Shift schedule" />} />
+            <Route path="staff/shifts" element={<ShiftsPage />} />
             <Route path="staff/leave" element={<LeavePage />} />
             <Route path="staff/payroll" element={<PayrollPage />} />
 
             {/* Finance */}
-            <Route path="invoices" element={<Placeholder title="Invoices" subtitle="Invoice management" />} />
-            <Route path="invoices/:id" element={<Placeholder title="Invoice Detail" />} />
-            <Route path="reports" element={<Placeholder title="Reports" subtitle="Revenue analytics" />} />
+            <Route path="invoices" element={<InvoicesPage />} />
+            <Route path="reports" element={<ReportsPage />} />
           </Route>
 
           {/* ─── Fallback ─── */}
