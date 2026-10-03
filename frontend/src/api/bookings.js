@@ -26,8 +26,14 @@ export const slotsApi = {
     const qs = new URLSearchParams(params).toString();
     return api.get(`/v1/slots${qs ? `?${qs}` : ''}`);
   },
-  getAvailability: (params = {}) => {
+  getAvailability: async (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return api.get(`/v1/slots${qs ? `?${qs}` : ''}`);
+    const result = await api.get(`/v1/slots${qs ? `?${qs}` : ''}`);
+    // The real backend returns { data: { date, courts: [...] } }
+    // We unwrap it so the React component receives an array directly, matching the old mock.
+    return {
+      success: true,
+      data: result.data?.courts || []
+    };
   },
 };
