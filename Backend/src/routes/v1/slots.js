@@ -6,7 +6,7 @@ const router = Router();
 // GET /api/v1/slots?date=YYYY-MM-DD
 router.get('/', async (req, res) => {
   try {
-    const { date } = req.query;
+    const { date, sport_id } = req.query;
 
     if (!date) {
       return res.status(400).json({ success: false, message: 'Missing required query parameter: date' });
@@ -17,16 +17,28 @@ router.get('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid date format. Use YYYY-MM-DD' });
     }
 
+    // Prepare timezone-aware date strings (assuming Indian Standard Time or local equivalent stored in UTC)
+    // To be safe and broad, we will match the date part of the timestamp string.
+    // Using gte and lt to capture the whole day
+    const startOfDay = `${date}T00:00:00.000Z`;
+    const endOfDay = `${date}T23:59:59.999Z`;
+
     // Query court_slots and associated courts and bookings
-    // Assuming 'bookings' has a foreign key to 'court_slots' and 'courts' is related.
-    const { data: slotsData, error } = await supabase
+    let query = supabase
       .from('court_slots')
       .select(`
         *,
-        courts (*),
+        courts!inner (*),
         bookings (*)
       `)
-      .eq('date', date);
+      .gte('start_time', startOfDay)
+      .lte('start_time', endOfDay);
+
+    if (sport_id) {
+      query = query.eq('courts.sport_id', sport_id);
+    }
+
+    const { data: slotsData, error } = await query;
 
     if (error) {
       // If relations fail, we will fallback to a simpler query, but we assume schema is correct.
