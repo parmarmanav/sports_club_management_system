@@ -9,6 +9,35 @@ router.use(verifySupabaseToken);
 router.use(authorizeRoles('admin', 'owner'));
 
 // GET /api/v1/staff
+/**
+ * @swagger
+ * /api/v1/staff:
+ *   get:
+ *     summary: Retrieve a list of all staff members
+ *     description: Returns a list of all staff members in the club. Requires admin or owner privileges.
+ *     tags: [Staff]
+ *     responses:
+ *       200:
+ *         description: A list of staff members.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       full_name:
+ *                         type: string
+ *                       role:
+ *                         type: string
+ */
 router.get('/', async (req, res) => {
   try {
     const { data: staff, error } = await supabase
