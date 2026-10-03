@@ -3,7 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
+import fs from 'fs';
 
 import membersRouter from './src/routes/v1/members.js';
 import leadsRouter from './src/routes/v1/leads.js';
@@ -25,30 +25,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Swagger configuration
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Sports Club Management API',
-      version: '1.0.0',
-      description: 'API documentation for the Sports Club Management System backend',
-    },
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-  },
-  apis: ['./src/routes/v1/*.js'], // Path to the API docs (looks for JSDoc comments in these files)
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+// Read Swagger JSON
+const swaggerDocument = JSON.parse(fs.readFileSync(new URL('./swagger-output.json', import.meta.url)));
 
 // Middleware
 app.use(cors());
@@ -56,7 +34,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Setup Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Health endpoint
 app.get('/api/health', (req, res) => {
@@ -100,7 +78,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
