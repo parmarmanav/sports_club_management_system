@@ -1,34 +1,87 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { supabase } from '../config/supabase';
 
 const AuthContext = createContext(null);
-
-const DEV_ROLES = ['owner', 'admin', 'manager', 'front_desk', 'bar_staff', 'kitchen_staff', 'shop_staff'];
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load persisted session on mount
   useEffect(() => {
-    const role = localStorage.getItem('cc_dev_role');
-    const staffId = localStorage.getItem('cc_dev_staff_id');
-    if (role) {
-      setUser({ role, staffId, name: `Dev (${role})` });
-    }
-    setLoading(false);
+    // Check active session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await fetchUserProfile(session.user);
+      } else {
+        setLoading(false);
+      }
+    };
+    checkSession();
+
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        await fetchUserProfile(session.user);
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const loginWithDevRole = (role, staffId = null) => {
-    localStorage.setItem('cc_dev_role', role);
-    if (staffId) localStorage.setItem('cc_dev_staff_id', staffId);
-    setUser({ role, staffId, name: `Dev (${role})` });
+  const fetchUserProfile = async (authUser) => {
+    try {
+      // 1. Try to find them in the staff table
+      const { data: staffData, error: staffError } = await supabase
+        .from('staff')
+        .select('*')
+        .eq('email', authUser.email)
+        .single();
+
+      if (staffData) {
+        // They are staff
+        setUser({
+          id: authUser.id,
+          staffId: staffData.id,
+          email: authUser.email,
+          role: staffData.role,
+          name: staffData.full_name,
+          type: 'staff'
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 2. If not staff, they are a member (or a new user)
+      const { data: memberData } = await supabase
+        .from('members')
+        .select('*')
+        .eq('email', authUser.email)
+        .single();
+
+      setUser({
+        id: authUser.id,
+        memberId: memberData?.id || null, // Might be null if they just signed up via Google and aren't in the DB yet
+        email: authUser.email,
+        role: 'member',
+        name: memberData?.full_name || authUser.user_metadata?.full_name || 'Member',
+        type: 'member'
+      });
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      setUser(null);
+      setLoading(false);
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('cc_dev_role');
-    localStorage.removeItem('cc_dev_staff_id');
-    localStorage.removeItem('cc_token');
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
   };
 
@@ -38,7 +91,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithDevRole, logout, hasRole, DEV_ROLES }}>
+    <AuthContext.Provider value={{ user, loading, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

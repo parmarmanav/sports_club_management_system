@@ -1,10 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const PublicLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const links = [
     { name: 'About', href: '/about' },
@@ -57,12 +60,42 @@ const PublicLayout = () => {
 
             {/* CTA + mobile toggle */}
             <div className="flex items-center gap-3">
-              <Link
-                to="/login"
-                className="hidden sm:inline-flex items-center gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-              >
-                Sign In
-              </Link>
+              {user ? (
+                <div className="relative hidden sm:block">
+                  <button 
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs">
+                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    {user.name}
+                  </button>
+                  {profileOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50">
+                      <div className="px-4 py-2 border-b border-slate-100 mb-2">
+                        <p className="text-sm font-medium text-slate-800 truncate">{user.name}</p>
+                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                      </div>
+                      {user.type === 'staff' && (
+                        <Link to="/app/dashboard" onClick={() => setProfileOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                          Staff Dashboard
+                        </Link>
+                      )}
+                      <button onClick={() => { logout(); setProfileOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <LogOut size={16} /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="hidden sm:inline-flex items-center gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+                >
+                  Sign In
+                </Link>
+              )}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="lg:hidden p-2 text-slate-500 hover:text-slate-700"
@@ -91,13 +124,42 @@ const PublicLayout = () => {
                   {link.name}
                 </Link>
               ))}
-              <Link
-                to="/login"
-                onClick={() => setMobileOpen(false)}
-                className="block mt-3 text-center bg-brand-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium"
-              >
-                Sign In
-              </Link>
+              {user ? (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-3 px-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-brand-primary text-white flex items-center justify-center font-bold">
+                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-800">{user.name}</p>
+                      <p className="text-xs text-slate-500">{user.email}</p>
+                    </div>
+                  </div>
+                  {user.type === 'staff' && (
+                    <Link
+                      to="/app/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 mb-2"
+                    >
+                      Staff Dashboard
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => { logout(); setMobileOpen(false); }}
+                    className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <LogOut size={18} /> Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="block mt-3 text-center bg-brand-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         )}
