@@ -2,11 +2,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-// Placeholder Pages
-const Home = () => <div className="p-8">Home Page Placeholder</div>;
-const Login = () => <div className="p-8">Login Page Placeholder</div>;
-const Register = () => <div className="p-8">Register Page Placeholder</div>;
-const ForgotPassword = () => <div className="p-8">Forgot Password Page Placeholder</div>;
+import Home from './pages/Home';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+
+// Placeholder Pages for future commits
 const Courts = () => <div className="p-8">Courts Page Placeholder</div>;
 const CourtDetails = () => <div className="p-8">Court Details Placeholder</div>;
 const BookCourt = () => <div className="p-8">Book Court Placeholder</div>;
