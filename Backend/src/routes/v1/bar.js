@@ -1,5 +1,6 @@
 import express from 'express';
 import { supabase } from '../../config/supabase.js';
+import { verifySupabaseToken } from '../../middleware/auth.js';
 
 const router = express.Router();
 
@@ -70,6 +71,119 @@ router.get('/tables', async (req, res) => {
     res.json({ success: true, data: formattedTables });
   } catch (error) {
     console.error('Error fetching bar tables:', error);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+});
+// 4. Open Bar Tab
+router.post('/orders', verifySupabaseToken, async (req, res) => {
+  try {
+    const { table_id, member_id } = req.body;
+    
+    if (!table_id) {
+      return res.status(400).json({ success: false, message: 'table_id is required' });
+    }
+
+    const { data: orderId, error } = await supabase.rpc('open_bar_tab', {
+      p_table_id: table_id,
+      p_member_id: member_id || null,
+      p_staff_id: req.user.id
+    });
+
+    if (error) {
+      if (error.message.includes('TABLE_NOT_FOUND')) {
+        return res.status(404).json({ success: false, message: 'Table not found' });
+      }
+      throw error;
+    }
+
+    res.status(201).json({ success: true, data: { order_id: orderId } });
+  } catch (error) {
+    console.error('Error opening bar tab:', error);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+});
+
+// 5. Add Item to Bar Order
+router.post('/orders/:id/items', verifySupabaseToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { menu_item_id, quantity = 1, notes } = req.body;
+
+    if (!menu_item_id || quantity <= 0) {
+      return res.status(400).json({ success: false, message: 'Valid menu_item_id and quantity > 0 are required' });
+    }
+
+    const { data: itemId, error } = await supabase.rpc('add_bar_item', {
+      p_bar_order_id: id,
+      p_menu_item_id: menu_item_id,
+      p_quantity: quantity,
+      p_notes: notes || null
+    });
+
+    if (error) {
+      if (error.message.includes('BAR_ORDER_NOT_FOUND')) {
+        return res.status(404).json({ success: false, message: 'Bar order not found' });
+      }
+      if (error.message.includes('BAR_ORDER_CLOSED')) {
+        return res.status(400).json({ success: false, message: 'Bar order is already closed' });
+      }
+      if (error.message.includes('MENU_ITEM_NOT_AVAILABLE')) {
+        return res.status(400).json({ success: false, message: 'Menu item not available' });
+      }
+      throw error;
+    }
+
+    res.status(201).json({ success: true, data: { item_id: itemId } });
+  } catch (error) {
+    console.error('Error adding item to bar order:', error);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+});
+
+// 6. Close Bar Tab & Pay
+router.post('/orders/:id/close', verifySupabaseToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { payment_method } = req.body;
+
+    if (!payment_method || !['cash', 'card', 'upi'].includes(payment_method)) {
+      return res.status(400).json({ success: false, message: 'Valid payment method (cash, card, upi) is required' });
+    }
+
+    const { data: paymentId, error } = await supabase.rpc('close_bar_tab', {
+      p_bar_order_id: id,
+      p_payment_method: payment_method,
+      p_staff_id: req.user.id
+    });
+
+    if (error) {
+      if (error.message.includes('BAR_ORDER_NOT_FOUND')) {
+        return res.status(404).json({ success: false, message: 'Bar order not found' });
+      }
+      if (error.message.includes('BAR_ORDER_CLOSED')) {
+        return res.status(400).json({ success: false, message: 'Bar order is already closed' });
+      }
+      throw error;
+    }
+
+    // Optionally fetch the final amount to return
+    const { data: order } = await supabase
+      .from('bar_orders')
+      .select('total, status')
+      .eq('id', id)
+      .single();
+
+    res.json({ 
+      success: true, 
+      data: { 
+        order_id: id,
+        payment_id: paymentId,
+        status: order?.status || 'closed',
+        total_amount: order?.total
+      } 
+    });
+  } catch (error) {
+    console.error('Error closing bar tab:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 });
