@@ -14,6 +14,9 @@ import BookingsPage from './pages/admin/BookingsPage';
 import ShopPOSPage from './pages/admin/ShopPOSPage';
 import BarPage from './pages/admin/BarPage';
 import KitchenPage from './pages/admin/KitchenPage';
+import StaffPage from './pages/admin/StaffPage';
+import LeavePage from './pages/admin/LeavePage';
+import PayrollPage from './pages/admin/PayrollPage';
 
 // Placeholder component for pages not yet built
 const Placeholder = ({ title, subtitle }) => (
@@ -78,10 +81,10 @@ function App() {
             <Route path="bar/kitchen" element={<KitchenPage />} />
 
             {/* HR & Staff */}
-            <Route path="staff" element={<Placeholder title="Staff" subtitle="Employee roster" />} />
+            <Route path="staff" element={<StaffPage />} />
             <Route path="staff/shifts" element={<Placeholder title="Shifts" subtitle="Shift schedule" />} />
-            <Route path="staff/leave" element={<Placeholder title="Leave" subtitle="Leave requests" />} />
-            <Route path="staff/payroll" element={<Placeholder title="Payroll" subtitle="Salary management" />} />
+            <Route path="staff/leave" element={<LeavePage />} />
+            <Route path="staff/payroll" element={<PayrollPage />} />
 
             {/* Finance */}
             <Route path="invoices" element={<Placeholder title="Invoices" subtitle="Invoice management" />} />
