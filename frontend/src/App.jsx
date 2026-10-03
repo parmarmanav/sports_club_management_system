@@ -5,6 +5,16 @@ import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import LoginPage from './pages/LoginPage';
 
+// Admin pages
+import DashboardPage from './pages/admin/DashboardPage';
+import MembersPage from './pages/admin/MembersPage';
+import NewMemberPage from './pages/admin/NewMemberPage';
+import LeadsPage from './pages/admin/LeadsPage';
+import BookingsPage from './pages/admin/BookingsPage';
+import ShopPOSPage from './pages/admin/ShopPOSPage';
+import BarPage from './pages/admin/BarPage';
+import KitchenPage from './pages/admin/KitchenPage';
+
 // Placeholder component for pages not yet built
 const Placeholder = ({ title, subtitle }) => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] page-enter">
@@ -48,24 +58,24 @@ function App() {
             }
           >
             <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<Placeholder title="Dashboard" subtitle="Summary & metrics" />} />
+            <Route path="dashboard" element={<DashboardPage />} />
 
             {/* People */}
-            <Route path="members" element={<Placeholder title="Members" subtitle="Member management" />} />
-            <Route path="members/new" element={<Placeholder title="New Member" subtitle="Registration form" />} />
+            <Route path="members" element={<MembersPage />} />
+            <Route path="members/new" element={<NewMemberPage />} />
             <Route path="members/:id" element={<Placeholder title="Member Profile" />} />
-            <Route path="leads" element={<Placeholder title="Leads" subtitle="Enquiry management" />} />
+            <Route path="leads" element={<LeadsPage />} />
 
             {/* Operations */}
-            <Route path="bookings" element={<Placeholder title="Bookings" subtitle="Court booking calendar" />} />
+            <Route path="bookings" element={<BookingsPage />} />
             <Route path="bookings/new" element={<Placeholder title="New Booking" subtitle="Book a court" />} />
-            <Route path="shop" element={<Placeholder title="Shop POS" subtitle="Point of sale" />} />
+            <Route path="shop" element={<ShopPOSPage />} />
             <Route path="shop/products" element={<Placeholder title="Products" subtitle="Inventory management" />} />
             <Route path="shop/orders" element={<Placeholder title="Orders" subtitle="Order history" />} />
 
             {/* Bar & Dining */}
-            <Route path="bar" element={<Placeholder title="Bar" subtitle="Table & tab management" />} />
-            <Route path="bar/kitchen" element={<Placeholder title="Kitchen Display" subtitle="KDS board" />} />
+            <Route path="bar" element={<BarPage />} />
+            <Route path="bar/kitchen" element={<KitchenPage />} />
 
             {/* HR & Staff */}
             <Route path="staff" element={<Placeholder title="Staff" subtitle="Employee roster" />} />
