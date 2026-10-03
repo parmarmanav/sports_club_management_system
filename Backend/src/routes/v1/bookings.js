@@ -112,4 +112,40 @@ router.post('/', verifySupabaseToken, async (req, res) => {
   }
 });
 
+// POST /api/v1/bookings/:id/cancel
+router.post('/:id/cancel', verifySupabaseToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Missing booking ID' });
+    }
+
+    const { data, error } = await supabase.rpc('cancel_booking', {
+      p_booking_id: id
+    });
+
+    if (error) {
+      if (error.message.includes('NOT_FOUND') || error.code === 'PGRST116') {
+        return res.status(404).json({ success: false, message: 'Booking not found' });
+      }
+      if (error.message.includes('ALREADY_CANCELLED')) {
+         return res.status(400).json({ success: false, message: 'Booking is already cancelled' });
+      }
+      if (error.message.includes('UNAUTHORIZED') || error.code === '403') {
+         return res.status(403).json({ success: false, message: 'Unauthorized request' });
+      }
+      if (error.code === '22P02') {
+         return res.status(400).json({ success: false, message: 'Invalid booking ID format' });
+      }
+      return res.status(400).json({ success: false, message: error.message, code: error.code });
+    }
+
+    return res.json({ success: true, message: 'Booking cancelled successfully', data });
+  } catch (error) {
+    console.error('Error cancelling booking:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+});
+
 export default router;
