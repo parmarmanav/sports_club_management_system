@@ -9,8 +9,19 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      config.headers['X-Dev-Role'] = 'front_desk';
+      config.headers['X-Dev-Staff-Id'] = user.id;
+    } catch(e) {}
+  }
+  
   return config;
 });

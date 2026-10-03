@@ -8,12 +8,10 @@ import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import Courts from './pages/courts/Courts';
 import CourtDetails from './pages/courts/CourtDetails';
-
-// Placeholder Pages for future commits
-const BookCourt = () => <div className="p-8">Book Court Placeholder</div>;
+import BookCourt from './pages/courts/BookCourt';
+import MemberBookings from './pages/member/Bookings';
 
 const MemberDashboard = () => <div className="p-8">Member Dashboard Placeholder</div>;
-const MemberBookings = () => <div className="p-8">Member Bookings Placeholder</div>;
 const MemberProfile = () => <div className="p-8">Member Profile Placeholder</div>;
 
 function App() {
