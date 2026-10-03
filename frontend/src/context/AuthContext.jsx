@@ -42,6 +42,10 @@ export function AuthProvider({ children }) {
         .select('*')
         .eq('email', authUser.email)
         .single();
+      
+      console.log('DEBUG: authUser.email:', authUser.email);
+      console.log('DEBUG: staffData:', staffData);
+      console.log('DEBUG: staffError:', staffError);
 
       if (staffData) {
         // They are staff

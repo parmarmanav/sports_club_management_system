@@ -1,7 +1,9 @@
+import { supabase } from '../config/supabase';
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Get stored auth info
-function getAuthHeaders() {
+async function getAuthHeaders() {
   const headers = { 'Content-Type': 'application/json' };
   
   // Dev-mode auth
@@ -13,18 +15,19 @@ function getAuthHeaders() {
     return headers;
   }
 
-  // JWT auth
-  const token = localStorage.getItem('cc_token');
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  // Get true JWT from Supabase
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
   }
   return headers;
 }
 
 async function request(path, options = {}) {
   const url = `${API_BASE}${path}`;
+  const headers = await getAuthHeaders();
   const config = {
-    headers: getAuthHeaders(),
+    headers,
     ...options,
   };
 
