@@ -36,6 +36,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend is running'
+  });
+});
+
 // API Routes
 app.use('/api/v1/members', membersRouter);
 app.use('/api/v1/leads', leadsRouter);
