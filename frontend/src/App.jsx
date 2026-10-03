@@ -10,9 +10,8 @@ import Courts from './pages/courts/Courts';
 import CourtDetails from './pages/courts/CourtDetails';
 import BookCourt from './pages/courts/BookCourt';
 import MemberBookings from './pages/member/Bookings';
-
-const MemberDashboard = () => <div className="p-8">Member Dashboard Placeholder</div>;
-const MemberProfile = () => <div className="p-8">Member Profile Placeholder</div>;
+import MemberDashboard from './pages/member/Dashboard';
+import MemberProfile from './pages/member/Profile';
 
 function App() {
   return (
