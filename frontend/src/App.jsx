@@ -15,6 +15,7 @@ import PlansPage from './pages/public/PlansPage';
 import CourtsPublicPage from './pages/public/CourtsPublicPage';
 import ShopPublicPage from './pages/public/ShopPublicPage';
 import BarPublicPage from './pages/public/BarPublicPage';
+import CheckoutPage from './pages/public/CheckoutPage';
 
 // Admin pages
 import DashboardPage from './pages/admin/DashboardPage';
@@ -52,6 +53,7 @@ function App() {
             <Route path="/courts" element={<CourtsPublicPage />} />
             <Route path="/shop" element={<ShopPublicPage />} />
             <Route path="/bar" element={<BarPublicPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/plans" element={<PlansPage />} />
             <Route path="/contact" element={<ContactPage />} />

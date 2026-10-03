@@ -27,36 +27,11 @@ const AdminLayout = () => {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  let navigation = [
-    { section: 'Overview' },
-    { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+  let navigation = [];
 
-    { section: 'People' },
-    { name: 'Members', href: '/app/members', icon: Users },
-    { name: 'Leads', href: '/app/leads', icon: UserPlus },
+  const role = user?.role || 'member';
 
-    { section: 'Operations' },
-    { name: 'Bookings', href: '/app/bookings', icon: CalendarDays },
-    { name: 'Shop POS', href: '/app/shop', icon: Store },
-    { name: 'Products', href: '/app/shop/products', icon: Package },
-    { name: 'Orders', href: '/app/shop/orders', icon: ShoppingCart },
-
-    { section: 'Bar & Dining' },
-    { name: 'Bar', href: '/app/bar', icon: Beer },
-    { name: 'Kitchen', href: '/app/bar/kitchen', icon: ChefHat },
-
-    { section: 'HR & Staff' },
-    { name: 'Staff', href: '/app/staff', icon: UserCog },
-    { name: 'Shifts', href: '/app/staff/shifts', icon: Clock },
-    { name: 'Leave', href: '/app/staff/leave', icon: FileText },
-    { name: 'Payroll', href: '/app/staff/payroll', icon: Receipt },
-
-    { section: 'Finance' },
-    { name: 'Invoices', href: '/app/invoices', icon: FileText },
-    { name: 'Reports', href: '/app/reports', icon: BarChart3 },
-  ];
-
-  if (user?.role === 'owner' || user?.role === 'admin') {
+  if (role === 'owner' || role === 'admin' || role === 'manager') {
     navigation = [
       { section: 'Overview & Finance' },
       { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
@@ -67,13 +42,51 @@ const AdminLayout = () => {
       { section: 'Club Operations' },
       { name: 'Bookings', href: '/app/bookings', icon: CalendarDays },
       { name: 'Members', href: '/app/members', icon: Users },
-      { name: 'Staff & Leave', href: '/app/staff/leave', icon: UserCog },
+      { name: 'Leads', href: '/app/leads', icon: UserPlus },
+      { name: 'Staff & Leave', href: '/app/staff', icon: UserCog },
       
       { section: 'Sales & Dining' },
       { name: 'Shop POS', href: '/app/shop', icon: Store },
-      { name: 'Orders', href: '/app/shop/orders', icon: ShoppingCart },
+      { name: 'Shop Products', href: '/app/shop/products', icon: Package },
+      { name: 'Shop Orders', href: '/app/shop/orders', icon: ShoppingCart },
       { name: 'Bar', href: '/app/bar', icon: Beer },
       { name: 'Kitchen', href: '/app/bar/kitchen', icon: ChefHat },
+    ];
+  } else if (role === 'front_desk') {
+    navigation = [
+      { section: 'Overview' },
+      { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+      { section: 'Front Desk' },
+      { name: 'Bookings', href: '/app/bookings', icon: CalendarDays },
+      { name: 'Members', href: '/app/members', icon: Users },
+      { name: 'Leads', href: '/app/leads', icon: UserPlus },
+      { name: 'Invoices', href: '/app/invoices', icon: FileText },
+    ];
+  } else if (role === 'bar_staff' || role === 'kitchen_staff') {
+    navigation = [
+      { section: 'Overview' },
+      { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+      { section: 'Bar & Dining' },
+      { name: 'Bar Orders', href: '/app/bar', icon: Beer },
+      { name: 'Kitchen', href: '/app/bar/kitchen', icon: ChefHat },
+    ];
+  } else if (role === 'shop_staff') {
+    navigation = [
+      { section: 'Overview' },
+      { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+      { section: 'Pro Shop' },
+      { name: 'Shop POS', href: '/app/shop', icon: Store },
+      { name: 'Products', href: '/app/shop/products', icon: Package },
+      { name: 'Orders', href: '/app/shop/orders', icon: ShoppingCart },
+    ];
+  } else {
+    // Member or unknown
+    navigation = [
+      { section: 'My Account' },
+      { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+      { name: 'My Bookings', href: '/app/bookings', icon: CalendarDays },
+      { name: 'My Orders', href: '/app/shop/orders', icon: ShoppingCart },
+      { name: 'Invoices', href: '/app/invoices', icon: FileText },
     ];
   }
 
@@ -85,12 +98,15 @@ const AdminLayout = () => {
   const SidebarContent = () => (
     <>
       {/* Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-white/[0.06] shrink-0">
-        <Link to="/app/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center">
+      <div className="h-16 flex items-center px-5 border-b border-white/[0.06] shrink-0 hover:bg-white/[0.02] transition-colors">
+        <Link to="/" className="flex items-center gap-3" title="Back to main website">
+          <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center shadow-lg shadow-brand-accent/20">
             <span className="text-white font-bold text-sm">CC</span>
           </div>
-          <span className="text-base font-semibold text-white tracking-wide">Champions Club</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-white tracking-wide uppercase leading-none mb-0.5">Champions Club</span>
+            <span className="text-[10px] text-slate-400 font-medium tracking-widest uppercase leading-none">Back to Site &rarr;</span>
+          </div>
         </Link>
       </div>
 

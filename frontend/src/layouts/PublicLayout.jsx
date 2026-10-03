@@ -80,11 +80,9 @@ const PublicLayout = () => {
                         <p className="text-sm font-medium text-slate-800 truncate">{user.name}</p>
                         <p className="text-xs text-slate-500 truncate">{user.email}</p>
                       </div>
-                      {user.type === 'staff' && (
-                        <Link to="/app/dashboard" onClick={() => setProfileOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                          Staff Dashboard
-                        </Link>
-                      )}
+                      <Link to="/app/dashboard" onClick={() => setProfileOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                        {user.type === 'staff' ? 'Staff Dashboard' : 'My Profile & Bookings'}
+                      </Link>
                       <button onClick={() => { logout(); setProfileOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
                         <LogOut size={16} /> Sign Out
                       </button>
@@ -138,15 +136,13 @@ const PublicLayout = () => {
                       <p className="text-xs text-slate-500">{user.email}</p>
                     </div>
                   </div>
-                  {user.type === 'staff' && (
-                    <Link
-                      to="/app/dashboard"
-                      onClick={() => setMobileOpen(false)}
-                      className="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 mb-2"
-                    >
-                      Staff Dashboard
-                    </Link>
-                  )}
+                  <Link
+                    to="/app/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 mb-2"
+                  >
+                    {user.type === 'staff' ? 'Staff Dashboard' : 'My Profile & Bookings'}
+                  </Link>
                   <button
                     onClick={() => { logout(); setMobileOpen(false); }}
                     className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"

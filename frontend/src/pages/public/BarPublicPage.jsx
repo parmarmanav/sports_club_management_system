@@ -4,7 +4,7 @@ import useApi from '../../hooks/useApi';
 import { barApi } from '../../api/bar';
 import { formatCurrency } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const MOCK_TABLES = [
   { id: 't1', table_number: '1', status: 'available', capacity: 2 },
@@ -19,6 +19,7 @@ const MOCK_TABLES = [
 
 export default function BarPublicPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: menuData, loading: menuLoading } = useApi(() => barApi.getMenu({ is_active: true }));
   const { data: tablesData, loading: tablesLoading } = useApi(() => barApi.getTables());
   
@@ -31,6 +32,21 @@ export default function BarPublicPage() {
   const filtered = menu.filter(item =>
     item.name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleOrder = (item) => {
+    navigate('/checkout', {
+      state: {
+        type: 'bar',
+        title: `Table ${selectedTable.table_number} Order`,
+        item: {
+          menu_item_id: item.id,
+          name: item.name,
+          desc: item.bar_categories?.name || 'Beverages',
+          price: parseFloat(item.price)
+        }
+      }
+    });
+  };
 
   return (
     <div className="page-enter bg-brand-surface min-h-screen">
@@ -125,8 +141,8 @@ export default function BarPublicPage() {
                       <div className="flex items-center justify-between mt-4">
                         <span className="text-lg font-bold text-brand-accent">{formatCurrency(item.price)}</span>
                         {user ? (
-                           <button className="px-3 py-1.5 bg-brand-accent/10 text-brand-accent hover:bg-brand-accent hover:text-white rounded-lg text-xs font-bold transition-colors">
-                             Add to Order
+                           <button onClick={() => handleOrder(item)} className="px-3 py-1.5 bg-brand-accent/10 text-brand-accent hover:bg-brand-accent hover:text-white rounded-lg text-xs font-bold transition-colors">
+                             Order Now
                            </button>
                         ) : null}
                       </div>

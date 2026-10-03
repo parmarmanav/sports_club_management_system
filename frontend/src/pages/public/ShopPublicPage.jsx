@@ -4,13 +4,29 @@ import useApi from '../../hooks/useApi';
 import { shopApi } from '../../api/shop';
 import { formatCurrency } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function ShopPublicPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: productsData, loading } = useApi(() => shopApi.getProducts({ in_stock: true }));
   const products = productsData || [];
   const [search, setSearch] = useState('');
+
+  const handleBuyNow = (product) => {
+    navigate('/checkout', {
+      state: {
+        type: 'shop',
+        title: 'Shop Checkout',
+        item: {
+          product_id: product.id,
+          name: product.name,
+          desc: product.product_categories?.name || 'General Product',
+          price: parseFloat(product.price)
+        }
+      }
+    });
+  };
 
   const filtered = products.filter(p =>
     p.name?.toLowerCase().includes(search.toLowerCase())
@@ -51,12 +67,20 @@ export default function ShopPublicPage() {
                   </div>
                   <p className="font-medium text-slate-800 mb-1">{p.name}</p>
                   <p className="text-xs text-brand-muted mb-2">{p.product_categories?.name || 'General'}</p>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-4">
                     <span className="text-lg font-bold text-brand-accent">{formatCurrency(p.price)}</span>
-                    <span className={`text-xs font-medium ${p.stock_qty > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${p.stock_qty > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                       {p.stock_qty > 0 ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </div>
+                  {user && p.stock_qty > 0 && (
+                    <button 
+                      onClick={() => handleBuyNow(p)}
+                      className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors"
+                    >
+                      Buy Now
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

@@ -2,20 +2,28 @@ import { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock, Users, ArrowRight, CheckCircle } from 'lucide-react';
 import useApi from '../../hooks/useApi';
 import { sportsApi, slotsApi, bookingsApi } from '../../api/bookings';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export default function CourtsPublicPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const today = new Date().toISOString().split('T')[0];
   const [date, setDate] = useState(today);
   const [sportId, setSportId] = useState('');
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [showPastBookings, setShowPastBookings] = useState(false);
 
   const { data: sportsData } = useApi(() => sportsApi.getAll());
   const sports = sportsData || [];
+
+  const { data: bookingsData, loading: bookingsLoading } = useApi(
+    () => (user && showPastBookings) ? bookingsApi.getAll() : Promise.resolve({ data: [] }),
+    [user, showPastBookings, bookingSuccess]
+  );
+  const myBookings = bookingsData || [];
 
   const { data: availData, loading } = useApi(
     () => sportId && date ? slotsApi.getAvailability({ sport_id: sportId, date }) : Promise.resolve({ data: [] }),
@@ -44,24 +52,23 @@ export default function CourtsPublicPage() {
     }
   };
 
-  const handleBook = async () => {
+  const handleBook = () => {
     if (!selectedSlot) return;
-    setIsBooking(true);
-    try {
-      await bookingsApi.create({
-        court_id: selectedSlot.court.court_id,
-        slot_id: selectedSlot.slot.id,
-        date,
-        time: selectedSlot.slot.start
-      });
-      setBookingSuccess(true);
-      setSelectedSlot(null);
-    } catch (error) {
-      console.error('Booking failed', error);
-      alert('Failed to book. Please try again.');
-    } finally {
-      setIsBooking(false);
-    }
+    navigate('/checkout', {
+      state: {
+        type: 'court',
+        title: 'Court Booking Checkout',
+        item: {
+          court_id: selectedSlot.court.court_id,
+          slot_id: selectedSlot.slot.id,
+          date,
+          time: selectedSlot.slot.start,
+          name: `${selectedSlot.court.court_name}`,
+          desc: `${new Date(selectedSlot.slot.start).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`,
+          price: 500 // Base price, discount applied at checkout
+        }
+      }
+    });
   };
 
   // Pre-select first sport if loaded and none selected
@@ -121,11 +128,15 @@ export default function CourtsPublicPage() {
                 
                 <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap justify-end">
                   {user && (
-                    <Link to="/app/bookings" className="text-sm font-semibold text-brand-accent hover:text-brand-accent-light underline underline-offset-4 mr-2">
-                      View Past Bookings
-                    </Link>
+                    <button 
+                      onClick={() => setShowPastBookings(!showPastBookings)} 
+                      className="text-sm font-semibold text-brand-accent hover:text-brand-accent-light underline underline-offset-4 mr-2"
+                    >
+                      {showPastBookings ? 'Back to Booking' : 'View Past Bookings'}
+                    </button>
                   )}
-                  <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
+                  {!showPastBookings && (
+                    <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
                     <button onClick={() => shiftDate(-1)} className="p-2.5 text-slate-500 hover:text-slate-900 rounded-xl hover:bg-white hover:shadow-sm transition-all">
                       <ChevronLeft className="w-5 h-5" />
                     </button>
@@ -142,11 +153,41 @@ export default function CourtsPublicPage() {
                       <ChevronRight className="w-5 h-5" />
                     </button>
                   </div>
+                  )}
                 </div>
               </div>
 
-              {/* Availability Grid */}
-              {loading ? (
+              {/* View Toggle */}
+              {showPastBookings ? (
+                <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">Your Past Bookings</h3>
+                  {bookingsLoading ? (
+                    <p className="text-sm text-slate-500">Loading your bookings...</p>
+                  ) : myBookings.length === 0 ? (
+                    <p className="text-sm text-slate-500">You have no bookings yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {myBookings.map(b => (
+                        <div key={b.id} className="bg-white p-4 rounded-xl border border-slate-100 flex items-center justify-between shadow-sm">
+                          <div>
+                            <p className="font-bold text-slate-800">{b.court_slots?.courts?.name || 'Court'}</p>
+                            <p className="text-xs text-slate-500">{new Date(b.court_slots?.start_time || new Date()).toLocaleString()}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="inline-block px-2 py-1 rounded text-xs font-bold bg-slate-100 text-slate-600 mb-1">
+                              {b.status}
+                            </span>
+                            <p className="text-sm font-bold text-emerald-600">₹{b.price_charged || 500}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {/* Availability Grid */}
+                  {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 text-brand-muted">
                   <div className="w-10 h-10 border-4 border-slate-200 border-t-brand-accent rounded-full animate-spin mb-4"></div>
                   <p className="text-sm font-medium animate-pulse">Loading real-time availability...</p>
@@ -234,16 +275,16 @@ export default function CourtsPublicPage() {
                           <p className="text-emerald-100 text-sm">Your court has been successfully reserved.</p>
                         </div>
                       </div>
-                      <Link to="/app/bookings" className="relative z-10 flex items-center gap-2 bg-white text-emerald-900 px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-slate-100 hover-lift transition-all">
+                      <button onClick={() => { setBookingSuccess(false); setShowPastBookings(true); }} className="relative z-10 flex items-center gap-2 bg-white text-emerald-900 px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-slate-100 hover-lift transition-all">
                         View My Bookings <ArrowRight className="w-4 h-4" />
-                      </Link>
+                      </button>
                     </div>
                   ) : selectedSlot ? (
                     <div className="mt-12 p-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden border-2 border-emerald-500/50">
                       <div className="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
                       <div className="relative z-10 text-center sm:text-left text-white">
-                        <h4 className="text-xl font-bold mb-2">Confirm Your Booking</h4>
-                        <p className="text-slate-300 text-sm">
+                        <h4 className="text-xl font-bold mb-2">Proceed to Checkout</h4>
+                        <p className="text-slate-300 text-sm mb-1">
                           Booking <span className="font-bold text-emerald-400">{selectedSlot.court.court_name}</span> at <span className="font-bold text-emerald-400">{new Date(selectedSlot.slot.start).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
                         </p>
                       </div>
@@ -251,8 +292,8 @@ export default function CourtsPublicPage() {
                         <button onClick={() => setSelectedSlot(null)} className="px-6 py-3.5 rounded-xl text-sm font-bold text-slate-300 hover:text-white hover:bg-slate-700 transition-all">
                           Cancel
                         </button>
-                        <button onClick={handleBook} disabled={isBooking} className="flex items-center gap-2 bg-emerald-500 text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-emerald-400 transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed">
-                          {isBooking ? 'Processing...' : 'Confirm Booking'} <CheckCircle className="w-4 h-4" />
+                        <button onClick={handleBook} className="flex items-center gap-2 bg-emerald-500 text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-emerald-400 transition-all hover-lift">
+                          Checkout <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -266,6 +307,8 @@ export default function CourtsPublicPage() {
                     </div>
                   )}
                 </div>
+                  )}
+                </>
               )}
             </div>
           )}
