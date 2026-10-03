@@ -1,15 +1,56 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-green: #004225;
-  --color-brand-gold: #fcc201;
-  --color-brand-gray: #f5f5f5;
-  
-  --font-sans: 'Inter', 'Roboto', sans-serif;
+  /* ─── Brand palette: clean, professional, neutral ─── */
+  --color-brand-primary: #1e293b;     /* slate-800 — primary brand */
+  --color-brand-accent: #0f766e;      /* teal-700 — accent/CTA */
+  --color-brand-accent-light: #14b8a6; /* teal-500 — hover accent */
+  --color-brand-surface: #f8fafc;     /* slate-50 — page background */
+  --color-brand-card: #ffffff;        /* white — card surfaces */
+  --color-brand-muted: #64748b;       /* slate-500 — muted text */
+  --color-brand-border: #e2e8f0;      /* slate-200 — borders */
+  --color-brand-sidebar: #0f172a;     /* slate-900 — admin sidebar */
+  --color-brand-sidebar-hover: #1e293b; /* slate-800 */
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 font-sans;
+    @apply bg-brand-surface text-slate-800 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  /* Smooth page entrance animation */
+  .page-enter {
+    animation: pageEnter 0.3s ease-out;
+  }
+
+  @keyframes pageEnter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Custom scrollbar for admin sidebar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
   }
 }
