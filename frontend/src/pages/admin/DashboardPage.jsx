@@ -1,204 +1,249 @@
 import { useState } from 'react';
 import {
-  Users,
-  CalendarDays,
   TrendingUp,
-  Beer,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
-  Package,
+  CreditCard,
+  Building,
+  Users,
+  Download,
+  AlertCircle,
+  Receipt,
+  FileText,
   Clock,
+  Package,
+  CalendarDays,
+  Store,
+  Beer
 } from 'lucide-react';
 import useApi from '../../hooks/useApi';
 import { dashboardApi } from '../../api/dashboard';
-import { formatCurrency, statusColor, capitalize } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 
-// ─── Summary Card ───
-function StatCard({ icon: Icon, label, value, subtitle, color = 'bg-slate-100 text-slate-600' }) {
+// ─── Premium Stat Card ───
+function PremiumStatCard({ title, value, subtitle, icon: Icon, trend, isOwed }) {
   return (
-    <div className="bg-white rounded-xl border border-brand-border p-5 hover:shadow-sm transition-shadow">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-brand-muted font-medium">{label}</p>
-          <p className="text-2xl font-bold text-slate-800 mt-1">{value ?? '—'}</p>
-          {subtitle && <p className="text-xs text-brand-muted mt-1">{subtitle}</p>}
-        </div>
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] transition-all duration-300">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`p-3 rounded-xl ${isOwed ? 'bg-rose-50 text-rose-600' : 'bg-slate-900 text-white'}`}>
           <Icon className="w-5 h-5" />
         </div>
+        {trend && (
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${trend > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+            {trend > 0 ? '+' : ''}{trend}%
+          </span>
+        )}
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">{title}</h3>
+        <p className="text-3xl font-bold text-slate-900">{value}</p>
+        {subtitle && <p className="text-sm text-slate-500 mt-2 font-medium">{subtitle}</p>}
       </div>
     </div>
   );
 }
 
-// ─── Low Stock Alert Row ───
-function LowStockItem({ product }) {
-  const urgency = product.stock_qty === 0 ? 'Out of stock' : `${product.stock_qty} left`;
-  const urgencyColor = product.stock_qty === 0 ? 'text-rose-600' : 'text-amber-600';
+// ─── Mini Action Card ───
+function ActionCard({ title, value, icon: Icon, colorClass, urgency }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-          <Package className="w-4 h-4 text-amber-600" />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-800">{product.name}</p>
-          <p className="text-xs text-brand-muted">Threshold: {product.low_stock_threshold}</p>
-        </div>
+    <div className="flex items-center p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 ${colorClass}`}>
+        <Icon className="w-6 h-6" />
       </div>
-      <span className={`text-sm font-semibold ${urgencyColor}`}>{urgency}</span>
+      <div className="flex-1">
+        <p className="text-sm text-slate-500 font-medium">{title}</p>
+        <p className="text-lg font-bold text-slate-800">{value}</p>
+      </div>
+      {urgency && (
+        <div className="flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md">
+          <AlertCircle className="w-3 h-3" /> Action Needed
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Revenue Period Picker ───
-function PeriodTabs({ value, onChange }) {
-  const periods = [
-    { key: 'today', label: 'Today' },
-    { key: 'week', label: 'This Week' },
-    { key: 'month', label: 'This Month' },
-  ];
-  return (
-    <div className="flex bg-slate-100 rounded-lg p-0.5">
-      {periods.map((p) => (
-        <button
-          key={p.key}
-          onClick={() => onChange(p.key)}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-            value === p.key
-              ? 'bg-white text-slate-800 shadow-sm'
-              : 'text-brand-muted hover:text-slate-700'
-          }`}
-        >
-          {p.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ─── Main Dashboard ───
 export default function DashboardPage() {
-  const [revenuePeriod, setRevenuePeriod] = useState('month');
+  const [period, setPeriod] = useState('month');
 
   const { data: summary, loading: summaryLoading } = useApi(() => dashboardApi.getSummary());
   const { data: revenue, loading: revenueLoading } = useApi(
-    () => dashboardApi.getRevenue(revenuePeriod),
-    [revenuePeriod]
+    () => dashboardApi.getRevenue(period),
+    [period]
   );
-  const { data: lowStock, loading: lowStockLoading } = useApi(() => dashboardApi.getLowStock());
+  const { data: lowStock } = useApi(() => dashboardApi.getLowStock());
 
   const s = summary || {};
   const r = revenue || {};
 
+  const handleExport = () => {
+    window.print();
+  };
+
   return (
-    <div className="space-y-6 page-enter">
-      {/* ─── Summary Cards ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard
-          icon={Users}
-          label="Active Members"
-          value={summaryLoading ? '...' : s.active_members}
-          subtitle={s.expiring_soon ? `${s.expiring_soon} expiring soon` : null}
-          color="bg-emerald-50 text-emerald-600"
-        />
-        <StatCard
-          icon={CalendarDays}
-          label="Today's Bookings"
-          value={summaryLoading ? '...' : s.today_bookings}
-          color="bg-sky-50 text-sky-600"
-        />
-        <StatCard
+    <div className="max-w-7xl mx-auto space-y-8 pb-10">
+      
+      {/* ─── Premium Header ─── */}
+      <div className="bg-slate-900 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        {/* Decorative background element */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-primary opacity-20 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Executive Overview</h1>
+          <p className="text-slate-400 font-medium text-sm">Financial health, obligations, and operations at a glance.</p>
+        </div>
+        
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="bg-slate-800/50 p-1 rounded-xl backdrop-blur-md border border-slate-700">
+            {['today', 'week', 'month'].map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-6 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${
+                  period === p
+                    ? 'bg-white text-slate-900 shadow-md'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+          <button 
+            onClick={handleExport}
+            className="flex items-center gap-2 bg-brand-accent hover:bg-brand-accent-light text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-[0_0_15px_rgba(var(--brand-accent),0.5)]"
+          >
+            <Download className="w-4 h-4" />
+            Export Report
+          </button>
+        </div>
+      </div>
+
+      {/* ─── Core Financials ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <PremiumStatCard
+          title={`Revenue (${period})`}
+          value={revenueLoading ? '...' : formatCurrency(r.total || 0)}
+          subtitle="Money earned from all sources"
           icon={TrendingUp}
-          label="Monthly Revenue"
-          value={summaryLoading ? '...' : formatCurrency(s.total_revenue_month)}
-          color="bg-indigo-50 text-indigo-600"
         />
-        <StatCard
-          icon={Beer}
-          label="Open Bar Tabs"
-          value={summaryLoading ? '...' : s.open_tabs}
-          color="bg-amber-50 text-amber-600"
+        <PremiumStatCard
+          title="What We Owe (Payroll)"
+          value={summaryLoading ? '...' : formatCurrency(s.pending_payroll || 0)}
+          subtitle="Pending staff salaries"
+          icon={Receipt}
+          isOwed={true}
+        />
+        <PremiumStatCard
+          title="Owed To Us (Invoices)"
+          value={summaryLoading ? '...' : formatCurrency(s.pending_invoices || 0)}
+          subtitle="Unpaid member/client invoices"
+          icon={Building}
         />
       </div>
 
-      {/* ─── Revenue & Low Stock ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Revenue breakdown */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-brand-border p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-base font-semibold text-slate-800">Revenue</h3>
-              <p className="text-sm text-brand-muted">Breakdown by source</p>
-            </div>
-            <PeriodTabs value={revenuePeriod} onChange={setRevenuePeriod} />
-          </div>
+      {/* ─── Operational Action Center ─── */}
+      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+        <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+          <Clock className="w-5 h-5 text-brand-primary" /> Pending Actions & Operations
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <ActionCard 
+            title="Pending Leave" 
+            value={summaryLoading ? '-' : `${s.pending_leave || 0} Requests`} 
+            icon={Users} 
+            colorClass="bg-amber-100 text-amber-700"
+            urgency={(s.pending_leave || 0) > 0}
+          />
+          <ActionCard 
+            title="Low Stock Items" 
+            value={summaryLoading ? '-' : `${s.low_stock_count || 0} Products`} 
+            icon={Package} 
+            colorClass="bg-rose-100 text-rose-700"
+            urgency={(s.low_stock_count || 0) > 0}
+          />
+          <ActionCard 
+            title="Today's Bookings" 
+            value={summaryLoading ? '-' : `${s.today_bookings || 0} Courts`} 
+            icon={CalendarDays} 
+            colorClass="bg-sky-100 text-sky-700"
+          />
+          <ActionCard 
+            title="Open Bar Tabs" 
+            value={summaryLoading ? '-' : `${s.open_tabs || 0} Tabs`} 
+            icon={Beer} 
+            colorClass="bg-indigo-100 text-indigo-700"
+          />
+        </div>
+      </div>
 
+      {/* ─── Revenue Deep Dive ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        {/* Source Breakdown */}
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+          <h2 className="text-lg font-bold text-slate-900 mb-6">Where did we earn it?</h2>
           {revenueLoading ? (
-            <div className="flex items-center justify-center h-40 text-brand-muted text-sm">Loading...</div>
+            <div className="animate-pulse flex space-x-4"><div className="flex-1 space-y-6 py-1"><div className="h-2 bg-slate-200 rounded"></div><div className="h-2 bg-slate-200 rounded"></div></div></div>
           ) : (
-            <>
-              <p className="text-3xl font-bold text-slate-800 mb-6">{formatCurrency(r.total)}</p>
-
-              {/* Source breakdown as mini-bars */}
-              <div className="space-y-3">
-                {r.by_source && Object.entries(r.by_source).map(([source, amount]) => {
-                  const pct = r.total > 0 ? (amount / r.total) * 100 : 0;
-                  return (
-                    <div key={source}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-slate-600 capitalize">{source.replace('_', ' ')}</span>
-                        <span className="text-sm font-medium text-slate-800">{formatCurrency(amount)}</span>
+            <div className="space-y-6">
+              {[
+                { key: 'court', icon: CalendarDays, color: 'bg-sky-500' },
+                { key: 'shop', icon: Store, color: 'bg-emerald-500' },
+                { key: 'bar', icon: Beer, color: 'bg-amber-500' },
+                { key: 'invoice', icon: FileText, color: 'bg-indigo-500' },
+              ].map(({ key, icon: Icon, color }) => {
+                const amount = r.by_source?.[key] || 0;
+                const pct = r.total > 0 ? (amount / r.total) * 100 : 0;
+                return (
+                  <div key={key} className="group">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Icon className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
+                        <span className="text-sm font-semibold text-slate-700 capitalize">{key}</span>
                       </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-brand-accent rounded-full transition-all duration-500"
-                          style={{ width: `${Math.max(pct, 2)}%` }}
-                        />
-                      </div>
+                      <span className="text-sm font-bold text-slate-900">{formatCurrency(amount)}</span>
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className={`h-full ${color} rounded-full transition-all duration-1000 ease-out`} style={{ width: `${Math.max(pct, 2)}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-              {/* Payment method chips */}
-              {r.by_method && (
-                <div className="flex gap-3 mt-6 pt-4 border-t border-slate-100">
-                  {Object.entries(r.by_method).map(([method, amount]) => (
-                    <div key={method} className="flex-1 bg-slate-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-brand-muted capitalize">{method}</p>
-                      <p className="text-sm font-semibold text-slate-800 mt-0.5">{formatCurrency(amount)}</p>
-                    </div>
-                  ))}
+        {/* Method Breakdown */}
+        <div className="bg-slate-900 rounded-3xl p-8 shadow-xl text-white relative overflow-hidden">
+           <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-accent opacity-10 rounded-full blur-3xl pointer-events-none"></div>
+          <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-brand-accent" /> How did they pay?
+          </h2>
+          
+          {revenueLoading ? (
+             <div className="text-slate-500 text-sm">Loading data...</div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 relative z-10">
+              {['card', 'cash', 'upi', 'bank_transfer'].map(method => {
+                const amount = r.by_method?.[method] || 0;
+                if (amount === 0) return null;
+                return (
+                  <div key={method} className="bg-slate-800/80 backdrop-blur-sm rounded-2xl p-5 border border-slate-700">
+                    <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                      {method.replace('_', ' ')}
+                    </p>
+                    <p className="text-2xl font-bold text-white">{formatCurrency(amount)}</p>
+                  </div>
+                );
+              })}
+              {(!r.by_method || Object.keys(r.by_method).length === 0) && (
+                <div className="col-span-2 text-slate-500 text-sm bg-slate-800/50 rounded-xl p-4 text-center">
+                  No payments recorded in this period.
                 </div>
               )}
-            </>
-          )}
-        </div>
-
-        {/* Low stock alerts */}
-        <div className="bg-white rounded-xl border border-brand-border p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <h3 className="text-base font-semibold text-slate-800">Low Stock Alerts</h3>
-          </div>
-
-          {lowStockLoading ? (
-            <div className="flex items-center justify-center h-40 text-brand-muted text-sm">Loading...</div>
-          ) : lowStock && lowStock.length > 0 ? (
-            <div className="max-h-[360px] overflow-y-auto scrollbar-thin">
-              {lowStock.map((product) => (
-                <LowStockItem key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-40 text-brand-muted text-sm">
-              <Package className="w-8 h-8 mb-2 text-slate-300" />
-              <p>All stock levels are healthy</p>
             </div>
           )}
         </div>
+
       </div>
     </div>
   );

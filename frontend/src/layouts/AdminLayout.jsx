@@ -27,7 +27,7 @@ const AdminLayout = () => {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const navigation = [
+  let navigation = [
     { section: 'Overview' },
     { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
 
@@ -55,6 +55,27 @@ const AdminLayout = () => {
     { name: 'Invoices', href: '/app/invoices', icon: FileText },
     { name: 'Reports', href: '/app/reports', icon: BarChart3 },
   ];
+
+  if (user?.role === 'owner' || user?.role === 'admin') {
+    navigation = [
+      { section: 'Overview & Finance' },
+      { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+      { name: 'Reports', href: '/app/reports', icon: BarChart3 },
+      { name: 'Invoices', href: '/app/invoices', icon: FileText },
+      { name: 'Payroll', href: '/app/staff/payroll', icon: Receipt },
+      
+      { section: 'Club Operations' },
+      { name: 'Bookings', href: '/app/bookings', icon: CalendarDays },
+      { name: 'Members', href: '/app/members', icon: Users },
+      { name: 'Staff & Leave', href: '/app/staff/leave', icon: UserCog },
+      
+      { section: 'Sales & Dining' },
+      { name: 'Shop POS', href: '/app/shop', icon: Store },
+      { name: 'Orders', href: '/app/shop/orders', icon: ShoppingCart },
+      { name: 'Bar', href: '/app/bar', icon: Beer },
+      { name: 'Kitchen', href: '/app/bar/kitchen', icon: ChefHat },
+    ];
+  }
 
   const handleLogout = () => {
     logout();
