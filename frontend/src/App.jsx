@@ -5,6 +5,16 @@ import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import LoginPage from './pages/LoginPage';
 
+// Public pages
+import HomePage from './pages/public/HomePage';
+import AboutPage from './pages/public/AboutPage';
+import FacilitiesPage from './pages/public/FacilitiesPage';
+import GalleryPage from './pages/public/GalleryPage';
+import ContactPage from './pages/public/ContactPage';
+import PlansPage from './pages/public/PlansPage';
+import CourtsPublicPage from './pages/public/CourtsPublicPage';
+import ShopPublicPage from './pages/public/ShopPublicPage';
+
 // Admin pages
 import DashboardPage from './pages/admin/DashboardPage';
 import MembersPage from './pages/admin/MembersPage';
@@ -25,19 +35,6 @@ import PayrollPage from './pages/admin/PayrollPage';
 import InvoicesPage from './pages/admin/InvoicesPage';
 import ReportsPage from './pages/admin/ReportsPage';
 
-// Placeholder component for pages not yet built
-const Placeholder = ({ title, subtitle }) => (
-  <div className="flex flex-col items-center justify-center min-h-[50vh] page-enter">
-    <div className="text-center">
-      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-        <span className="text-2xl">🚧</span>
-      </div>
-      <h1 className="text-xl font-semibold text-slate-800 mb-1">{title}</h1>
-      <p className="text-sm text-brand-muted">{subtitle || 'This page is coming soon.'}</p>
-    </div>
-  </div>
-);
-
 function App() {
   return (
     <AuthProvider>
@@ -48,14 +45,14 @@ function App() {
 
           {/* ─── Public Routes ─── */}
           <Route element={<PublicLayout />}>
-            <Route path="/" element={<Placeholder title="Home" subtitle="Landing page coming soon" />} />
-            <Route path="/about" element={<Placeholder title="About & Heritage" />} />
-            <Route path="/facilities" element={<Placeholder title="Facilities" />} />
-            <Route path="/courts" element={<Placeholder title="Court Availability" />} />
-            <Route path="/shop" element={<Placeholder title="Shop Catalog" />} />
-            <Route path="/gallery" element={<Placeholder title="Gallery" />} />
-            <Route path="/plans" element={<Placeholder title="Membership Plans" />} />
-            <Route path="/contact" element={<Placeholder title="Contact Us" />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/facilities" element={<FacilitiesPage />} />
+            <Route path="/courts" element={<CourtsPublicPage />} />
+            <Route path="/shop" element={<ShopPublicPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/plans" element={<PlansPage />} />
+            <Route path="/contact" element={<ContactPage />} />
           </Route>
 
           {/* ─── Staff & Admin Routes ─── */}
