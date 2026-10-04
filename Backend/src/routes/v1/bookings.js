@@ -22,14 +22,20 @@ router.post('/', verifySupabaseToken, async (req, res) => {
     if (!payment_method) {
       return res.status(400).json({ success: false, message: 'Missing required field: payment_method' });
     }
+    const isStaff = req.user.type === 'staff';
+    const isMember = req.user.type === 'member';
+
+    const finalMemberId = isMember ? req.user.id : (member_id || null);
+    const finalStaffId = isStaff ? req.user.id : null;
 
     // Call the RPC to book the court
     const { data: bookingResult, error: bookingError } = await supabase.rpc('book_court', {
+      p_is_trial: req.body.is_trial || false,
+      p_member_id: finalMemberId,
       p_slot_id: slot_id,
-      p_member_id: member_id || null,
-      p_walk_in_name: walk_in_name || walker_name || null,
-      p_payment_method: payment_method,
-      p_staff_id: req.user.id
+      p_staff_id: finalStaffId,
+      p_walker_name: walk_in_name || walker_name || null,
+      p_walker_phone: req.body.walker_phone || req.body.walk_in_phone || null
     });
 
     if (bookingError) {

@@ -29,20 +29,33 @@ export const verifySupabaseToken = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
-    // 4. Find staff record
+    // 4. Find staff record first
     const { data: staff, error: staffError } = await supabase
       .from('staff')
       .select('*')
       .eq('email', user.email)
       .single();
 
-    if (staffError || !staff) {
-      return res.status(403).json({ success: false, message: 'Forbidden' });
+    if (!staffError && staff) {
+      req.user = { ...staff, type: 'staff' };
+      return next();
     }
 
-    // 5. Attach staff record
-    req.user = staff;
-    next();
+    // 5. If not staff, check if they are a member
+    const { data: member, error: memberError } = await supabase
+      .from('members')
+      .select('*')
+      .eq('email', user.email)
+      .single();
+
+    if (!memberError && member) {
+      // Treat members as a 'member' role for authorization checks
+      req.user = { ...member, type: 'member', role: 'member' };
+      return next();
+    }
+
+    // If neither staff nor member
+    return res.status(403).json({ success: false, message: 'Forbidden: User not found in system' });
   } catch (error) {
     console.error('Auth middleware error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
