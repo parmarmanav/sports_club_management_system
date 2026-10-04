@@ -12,6 +12,7 @@ function ProductModal({ open, onClose, product, onSaved }) {
     price: product?.price || '',
     stock_qty: product?.stock_qty || '',
     low_stock_threshold: product?.low_stock_threshold || 5,
+    image_url: product?.image_url || '',
   });
   const { data: categoriesData } = useApi(() => shopApi.getCategories());
   const categories = categoriesData || [];
@@ -59,6 +60,9 @@ function ProductModal({ open, onClose, product, onSaved }) {
               onChange={(e) => setForm(p => ({ ...p, low_stock_threshold: e.target.value }))}
               className="px-3.5 py-2.5 rounded-xl border border-brand-border text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/20" />
           </div>
+          <input type="text" placeholder="Image URL (optional)" value={form.image_url}
+            onChange={(e) => setForm(p => ({ ...p, image_url: e.target.value }))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent" />
           <button type="submit" disabled={submitting}
             className="w-full py-2.5 bg-brand-accent text-white rounded-xl text-sm font-medium hover:bg-brand-accent/90 disabled:opacity-50 transition-colors">
             {submitting ? 'Saving...' : isEdit ? 'Update Product' : 'Create Product'}
@@ -154,7 +158,14 @@ export default function ProductsPage() {
                     <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-5 py-3.5 font-medium text-slate-800">{p.name}</td>
                       <td className="px-5 py-3.5 text-slate-600 hidden md:table-cell">{p.product_categories?.name || '—'}</td>
-                      <td className="px-5 py-3.5 text-slate-600">{formatCurrency(p.price)}</td>
+                      <td className="px-5 py-3.5 text-slate-600">
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.name} className="w-8 h-8 rounded object-cover inline-block mr-2" />
+                        ) : (
+                          <Package className="w-4 h-4 text-slate-300 inline-block mr-2" />
+                        )}
+                        {formatCurrency(p.price)}
+                      </td>
                       <td className="px-5 py-3.5">
                         <span className={`font-medium ${isLow ? 'text-rose-600' : 'text-slate-800'}`}>
                           {p.stock_qty}

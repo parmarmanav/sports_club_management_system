@@ -61,12 +61,21 @@ export default function ShopPublicPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {filtered.map(p => (
-                <div key={p.id} className="bg-brand-surface rounded-2xl border border-brand-border p-5 hover:shadow-md transition-all hover:translate-y-[-2px] group">
-                  <div className="w-full h-40 rounded-xl bg-slate-100 flex items-center justify-center mb-4 group-hover:bg-brand-accent/5 transition-colors">
-                    <Package className="w-10 h-10 text-slate-300 group-hover:text-brand-accent/40 transition-colors" />
+                <div key={p.id} className="bg-brand-surface rounded-2xl border border-brand-border p-5 hover:shadow-md transition-all hover:translate-y-[-2px] group flex flex-col h-full">
+                  {p.image_url ? (
+                    <div className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-brand-border/50">
+                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 rounded-xl bg-slate-100 flex items-center justify-center mb-4 group-hover:bg-brand-accent/5 transition-colors">
+                      <Package className="w-10 h-10 text-slate-300 group-hover:text-brand-accent/40 transition-colors" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-800 mb-1">{p.name}</p>
+                    <p className="text-xs text-brand-muted mb-2">{p.product_categories?.name || 'General'}</p>
                   </div>
-                  <p className="font-medium text-slate-800 mb-1">{p.name}</p>
-                  <p className="text-xs text-brand-muted mb-2">{p.product_categories?.name || 'General'}</p>
+                  <div className="mt-auto">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-lg font-bold text-brand-accent">{formatCurrency(p.price)}</span>
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${p.stock_qty > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
@@ -81,6 +90,7 @@ export default function ShopPublicPage() {
                       Buy Now
                     </button>
                   )}
+                  </div>
                 </div>
               ))}
             </div>
