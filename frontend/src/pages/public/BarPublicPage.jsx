@@ -132,13 +132,26 @@ export default function BarPublicPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   {filtered.map(item => (
-                    <div key={item.id} className="bg-brand-surface rounded-2xl border border-brand-border p-5 hover:shadow-md transition-all hover:translate-y-[-2px] group">
-                      <div className="w-full h-40 rounded-xl bg-slate-100 flex items-center justify-center mb-4 group-hover:bg-brand-accent/5 transition-colors">
-                        <Coffee className="w-10 h-10 text-slate-300 group-hover:text-brand-accent/40 transition-colors" />
+                    <div key={item.id} className="bg-brand-surface rounded-2xl border border-brand-border p-5 hover:shadow-md transition-all hover:translate-y-[-2px] group flex flex-col h-full">
+                      <div className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-brand-border/50 bg-slate-100 flex items-center justify-center">
+                        <img 
+                          src={`https://tse1.mm.bing.net/th?q=${encodeURIComponent(item.name + ' food drink delicious')}&w=800&h=800&c=7&rs=1`} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div style={{display: 'none'}} className="w-full h-full items-center justify-center group-hover:bg-brand-accent/5 transition-colors">
+                          <Coffee className="w-10 h-10 text-slate-300 group-hover:text-brand-accent/40 transition-colors" />
+                        </div>
                       </div>
-                      <p className="font-medium text-slate-800 mb-1">{item.name}</p>
-                      <p className="text-xs text-brand-muted mb-2">{item.bar_categories?.name || 'Beverages'}</p>
-                      <div className="flex items-center justify-between mt-4">
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-800 mb-1">{item.name}</p>
+                        <p className="text-xs text-brand-muted mb-2">{item.bar_categories?.name || 'Beverages'}</p>
+                      </div>
+                      <div className="mt-auto flex items-center justify-between pt-2">
                         <span className="text-lg font-bold text-brand-accent">{formatCurrency(item.price)}</span>
                         {user ? (
                            <button onClick={() => handleOrder(item)} className="px-3 py-1.5 bg-brand-accent/10 text-brand-accent hover:bg-brand-accent hover:text-white rounded-lg text-xs font-bold transition-colors">

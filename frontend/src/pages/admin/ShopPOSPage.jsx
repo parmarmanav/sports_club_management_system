@@ -80,11 +80,17 @@ export default function ShopPOSPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {filtered.map(p => (
                 <button key={p.id} onClick={() => addToCart(p)}
-                  className="bg-white rounded-xl border border-brand-border p-4 text-left hover:shadow-md hover:border-brand-accent/30 transition-all group">
-                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-3 group-hover:bg-brand-accent/10 transition-colors">
-                    <Package className="w-5 h-5 text-slate-400 group-hover:text-brand-accent transition-colors" />
-                  </div>
-                  <p className="text-sm font-medium text-slate-800 mb-0.5 line-clamp-1">{p.name}</p>
+                  className="bg-white rounded-xl border border-brand-border p-4 text-left hover:shadow-md hover:border-brand-accent/30 transition-all group flex flex-col items-start h-full">
+                  {p.image_url ? (
+                    <div className="w-full h-24 rounded-lg overflow-hidden mb-3 border border-brand-border/50">
+                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-3 group-hover:bg-brand-accent/10 transition-colors">
+                      <Package className="w-5 h-5 text-slate-400 group-hover:text-brand-accent transition-colors" />
+                    </div>
+                  )}
+                  <p className="text-sm font-medium text-slate-800 mb-0.5 line-clamp-2">{p.name}</p>
                   <p className="text-xs text-brand-muted mb-1">Stock: {p.stock_qty}</p>
                   <p className="text-sm font-bold text-brand-accent">{formatCurrency(p.price)}</p>
                 </button>
