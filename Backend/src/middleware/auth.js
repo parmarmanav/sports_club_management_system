@@ -33,7 +33,7 @@ export const verifySupabaseToken = async (req, res, next) => {
     const { data: staff, error: staffError } = await supabase
       .from('staff')
       .select('*')
-      .eq('email', user.email)
+      .ilike('email', user.email)
       .single();
 
     if (!staffError && staff) {
@@ -45,7 +45,7 @@ export const verifySupabaseToken = async (req, res, next) => {
     const { data: member, error: memberError } = await supabase
       .from('members')
       .select('*')
-      .eq('email', user.email)
+      .ilike('email', user.email)
       .single();
 
     if (!memberError && member) {
