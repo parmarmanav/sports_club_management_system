@@ -34,7 +34,7 @@ router.post('/', verifySupabaseToken, async (req, res) => {
       p_member_id: finalMemberId,
       p_slot_id: slot_id,
       p_staff_id: finalStaffId,
-      p_walker_name: walk_in_name || walker_name || null,
+      p_walker_name: walk_in_name || walker_name || (req.user.type === 'guest' ? req.user.full_name : null),
       p_walker_phone: req.body.walker_phone || req.body.walk_in_phone || null
     });
 

@@ -24,6 +24,10 @@ export const verifySupabaseToken = async (req, res, next) => {
 
     // 2. Verify Supabase token
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    console.log("== AUTH DEBUG ==");
+    console.log("Auth Error:", authError);
+    console.log("User Email from JWT:", user?.email);
+    console.log("================");
 
     if (authError || !user || !user.email) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
@@ -53,9 +57,9 @@ export const verifySupabaseToken = async (req, res, next) => {
       req.user = { ...member, type: 'member', role: 'member' };
       return next();
     }
-
-    // If neither staff nor member
-    return res.status(403).json({ success: false, message: 'Forbidden: User not found in system' });
+    // If neither staff nor member, treat them as a guest
+    req.user = { id: user.id, email: user.email, type: 'guest', role: 'guest', full_name: user?.user_metadata?.full_name || 'Guest User' };
+    return next();
   } catch (error) {
     console.error('Auth middleware error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
