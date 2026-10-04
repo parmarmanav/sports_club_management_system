@@ -80,7 +80,7 @@ export default function CheckoutPage() {
       } else if (type === 'bar' && finalOrderItems.length > 0) {
         // Step 1: Open Tab
         const openRes = await barApi.openTab({
-          table_id: location.state?.table_id || 't1', // default table if none
+          table_id: location.state?.table_id || '36f1092e-6e64-48b5-b22f-6ab5b9a898d9', // Fallback to a valid table UUID if missing
           member_id: user ? user.id : null,
         });
         const orderId = openRes.data.data.order_id;
