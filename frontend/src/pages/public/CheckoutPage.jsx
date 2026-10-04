@@ -70,7 +70,7 @@ export default function CheckoutPage() {
         navigate(type === 'court' ? '/app/bookings' : '/');
       }, 2000);
     } catch (err) {
-      alert("Payment failed");
+      alert("Payment failed: " + (err.message || JSON.stringify(err)));
     } finally {
       setIsProcessing(false);
     }
