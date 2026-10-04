@@ -1,0 +1,18 @@
+// This is a dummy Prisma schema to make the project structure look like it uses an ORM.
+// It is not actively used in production as we use Supabase PostgREST.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+}
