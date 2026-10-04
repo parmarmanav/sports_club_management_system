@@ -28,12 +28,23 @@ export default function BarPublicPage() {
 
   const [search, setSearch] = useState('');
   const [selectedTable, setSelectedTable] = useState(null);
+  const [quantities, setQuantities] = useState({});
+
+  const handleQtyChange = (id, delta) => {
+    setQuantities(prev => {
+      const current = prev[id] || 1;
+      const next = current + delta;
+      if (next < 1) return prev;
+      return { ...prev, [id]: next };
+    });
+  };
 
   const filtered = menu.filter(item =>
     item.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleOrder = (item) => {
+    const qty = quantities[item.id] || 1;
     navigate('/checkout', {
       state: {
         type: 'bar',
@@ -43,7 +54,8 @@ export default function BarPublicPage() {
           menu_item_id: item.id,
           name: item.name,
           desc: item.bar_categories?.name || 'Beverages',
-          price: parseFloat(item.price)
+          price: parseFloat(item.price),
+          quantity: qty,
         }
       }
     });
@@ -155,9 +167,16 @@ export default function BarPublicPage() {
                       <div className="mt-auto flex items-center justify-between pt-2">
                         <span className="text-lg font-bold text-brand-accent">{formatCurrency(item.price)}</span>
                         {user ? (
-                           <button onClick={() => handleOrder(item)} className="px-3 py-1.5 bg-brand-accent/10 text-brand-accent hover:bg-brand-accent hover:text-white rounded-lg text-xs font-bold transition-colors">
-                             Order Now
-                           </button>
+                           <div className="flex flex-col gap-2 items-end">
+                             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg p-1">
+                               <button onClick={() => handleQtyChange(item.id, -1)} className="w-6 h-6 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs">-</button>
+                               <span className="text-xs font-bold w-4 text-center">{quantities[item.id] || 1}</span>
+                               <button onClick={() => handleQtyChange(item.id, 1)} className="w-6 h-6 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs">+</button>
+                             </div>
+                             <button onClick={() => handleOrder(item)} className="px-3 py-1.5 bg-brand-accent/10 text-brand-accent hover:bg-brand-accent hover:text-white rounded-lg text-xs font-bold transition-colors">
+                               Order Now
+                             </button>
+                           </div>
                         ) : null}
                       </div>
                     </div>

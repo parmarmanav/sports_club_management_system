@@ -40,7 +40,7 @@ export default function CheckoutPage() {
   };
 
   const discountRate = getDiscountRate();
-  const subtotal = orderItems.reduce((acc, curr) => acc + (curr.price || 0), 0);
+  const subtotal = orderItems.reduce((acc, curr) => acc + ((curr.price || 0) * (curr.quantity || 1)), 0);
   const discountAmount = subtotal * discountRate;
   const total = subtotal - discountAmount;
 
@@ -147,10 +147,10 @@ export default function CheckoutPage() {
              {orderItems.map((oi, idx) => (
                <div key={idx} className="flex justify-between items-center mb-2">
                  <div>
-                   <p className="font-semibold text-slate-700">{oi.title || oi.name || oi.court_name || 'Item'}</p>
+                   <p className="font-semibold text-slate-700">{oi.title || oi.name || oi.court_name || 'Item'} {oi.quantity > 1 ? `(x${oi.quantity})` : ''}</p>
                    {oi.time && <p className="text-xs text-slate-500">{oi.date} at {oi.time}</p>}
                  </div>
-                 <p className="font-bold text-slate-800">₹{oi.price || 0}</p>
+                 <p className="font-bold text-slate-800">₹{(oi.price || 0) * (oi.quantity || 1)}</p>
                </div>
              ))}
              <div className="flex justify-between items-center pt-3 mt-3 border-t">
@@ -297,10 +297,10 @@ export default function CheckoutPage() {
                 {orderItems.map((oi, i) => (
                   <div key={i} className="flex justify-between items-start text-sm">
                     <div className="pr-4">
-                      <p className="font-bold text-slate-100">{oi.name}</p>
+                      <p className="font-bold text-slate-100">{oi.name} {oi.quantity > 1 ? `(x${oi.quantity})` : ''}</p>
                       {oi.desc && <p className="text-slate-400 text-xs mt-0.5">{oi.desc}</p>}
                     </div>
-                    <span className="font-medium text-slate-300">₹{oi.price}</span>
+                    <span className="font-medium text-slate-300">₹{(oi.price || 0) * (oi.quantity || 1)}</span>
                   </div>
                 ))}
               </div>

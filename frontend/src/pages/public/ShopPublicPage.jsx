@@ -12,8 +12,20 @@ export default function ShopPublicPage() {
   const { data: productsData, loading } = useApi(() => shopApi.getProducts({ in_stock: true }));
   const products = productsData || [];
   const [search, setSearch] = useState('');
+  const [quantities, setQuantities] = useState({});
+
+  const handleQtyChange = (id, delta, maxStock) => {
+    setQuantities(prev => {
+      const current = prev[id] || 1;
+      const next = current + delta;
+      if (next < 1) return prev;
+      if (maxStock !== undefined && next > maxStock) return prev;
+      return { ...prev, [id]: next };
+    });
+  };
 
   const handleBuyNow = (product) => {
+    const qty = quantities[product.id] || 1;
     navigate('/checkout', {
       state: {
         type: 'shop',
@@ -22,7 +34,8 @@ export default function ShopPublicPage() {
           product_id: product.id,
           name: product.name,
           desc: product.product_categories?.name || 'General Product',
-          price: parseFloat(product.price)
+          price: parseFloat(product.price),
+          quantity: qty,
         }
       }
     });
@@ -83,12 +96,19 @@ export default function ShopPublicPage() {
                     </span>
                   </div>
                   {user && p.stock_qty > 0 && (
-                    <button 
-                      onClick={() => handleBuyNow(p)}
-                      className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors"
-                    >
-                      Buy Now
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-1">
+                        <button onClick={() => handleQtyChange(p.id, -1, p.stock_qty)} className="w-8 h-8 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100">-</button>
+                        <span className="text-sm font-bold w-8 text-center">{quantities[p.id] || 1}</span>
+                        <button onClick={() => handleQtyChange(p.id, 1, p.stock_qty)} className="w-8 h-8 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100">+</button>
+                      </div>
+                      <button 
+                        onClick={() => handleBuyNow(p)}
+                        className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors"
+                      >
+                        Buy Now
+                      </button>
+                    </div>
                   )}
                   </div>
                 </div>

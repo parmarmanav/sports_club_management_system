@@ -45,8 +45,8 @@ export default function CourtsPublicPage() {
     setBookingSuccess(false);
   };
 
-  const handleSlotClick = (court, slot) => {
-    if (user && slot.is_available) {
+  const handleSlotClick = (court, slot, isAvailable) => {
+    if (user && isAvailable) {
       setSelectedSlot({ court, slot });
       setBookingSuccess(false);
     }
@@ -213,25 +213,36 @@ export default function CourtsPublicPage() {
                         {court.slots?.map((slot, i) => {
                           const timeString = new Date(slot.start).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
                           const isSelected = selectedSlot?.slot?.id === slot.id;
+                          
+                          const isPast = new Date(slot.start) < new Date();
+                          const isTrulyAvailable = (idx) => {
+                            if (idx < 0 || idx >= court.slots.length) return false;
+                            const currentAvailable = court.slots[idx].is_available;
+                            const prevAvailable = idx > 0 ? court.slots[idx - 1].is_available : true;
+                            return currentAvailable && prevAvailable;
+                          };
+                          
+                          const isAvailableForBooking = isTrulyAvailable(i) && isTrulyAvailable(i + 1) && !isPast;
+
                           return (
                             <button key={i}
-                              disabled={!user || !slot.is_available}
-                              onClick={() => handleSlotClick(court, slot)}
+                              disabled={!user || !isAvailableForBooking}
+                              onClick={() => handleSlotClick(court, slot, isAvailableForBooking)}
                               className={`relative overflow-hidden px-1 py-3 rounded-xl text-center border-2 transition-all duration-300 ${
                                 isSelected 
                                   ? 'border-emerald-500 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] scale-105 z-10' 
-                                  : slot.is_available
+                                  : isAvailableForBooking
                                     ? slot.is_social 
                                         ? `border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 hover:border-indigo-300 ${user ? 'cursor-pointer' : ''}` 
                                         : `border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 ${user ? 'hover-lift cursor-pointer' : ''}`
                                     : 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed'
                               }`}>
                               
-                              <p className={`text-sm font-bold ${isSelected ? 'text-white' : slot.is_available ? 'text-slate-800' : 'text-slate-400 line-through'}`}>
+                              <p className={`text-sm font-bold ${isSelected ? 'text-white' : isAvailableForBooking ? 'text-slate-800' : 'text-slate-400 line-through'}`}>
                                 {timeString}
                               </p>
                               
-                              {slot.is_available && (
+                              {isAvailableForBooking && (
                                 <div className="mt-1 flex justify-center items-center gap-1">
                                   {slot.is_social ? (
                                     <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-indigo-100' : 'text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded-md'}`}>
