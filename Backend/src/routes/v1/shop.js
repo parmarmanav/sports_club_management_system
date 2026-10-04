@@ -129,7 +129,7 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
 
     // Call place_shop_order RPC
     const { data: orderId, error: orderError } = await supabase.rpc('place_shop_order', {
-      p_member_id: member_id || null,
+      p_member_id: req.user.type === 'staff' ? null : (member_id || null),
       p_channel: channel,
       p_fulfilment_type: fulfilment_type,
       p_delivery_address: delivery_address || null,

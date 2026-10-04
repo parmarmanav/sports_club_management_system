@@ -85,7 +85,7 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
 
     const { data: orderId, error } = await supabase.rpc('open_bar_tab', {
       p_table_id: table_id,
-      p_member_id: member_id || null,
+      p_member_id: req.user.type === 'staff' ? null : (member_id || null),
       p_staff_id: req.user.type === 'staff' ? req.user.id : null
     });
 

@@ -72,7 +72,7 @@ export default function CheckoutPage() {
         await shopApi.checkout({
           items: finalOrderItems,
           payment_method: paymentMethod,
-          member_id: user ? user.id : null,
+          member_id: (user && user.role === 'member') ? (user.memberId || null) : null,
           channel: 'in_store',
           fulfilment_type: 'immediate',
           guest_name: user ? null : 'Guest',
@@ -81,9 +81,9 @@ export default function CheckoutPage() {
         // Step 1: Open Tab
         const openRes = await barApi.openTab({
           table_id: location.state?.table_id || '36f1092e-6e64-48b5-b22f-6ab5b9a898d9', // Fallback to a valid table UUID if missing
-          member_id: user ? user.id : null,
+          member_id: (user && user.role === 'member') ? (user.memberId || null) : null,
         });
-        const orderId = openRes.data.data.order_id;
+        const orderId = openRes.data.order_id;
         
         // Step 2: Add all items
         for (const fItem of finalOrderItems) {
