@@ -2,3 +2,4 @@ API.md
 schema.sql
 seed1.sql
 seed2.sql
+supabase_trigger.sql
