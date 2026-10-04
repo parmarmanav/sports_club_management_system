@@ -125,7 +125,7 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid or missing payment method' });
     }
 
-    const staff_id = req.user.id;
+    const staff_id = req.user.type === 'staff' ? req.user.id : null;
 
     // Call place_shop_order RPC
     const { data: orderId, error: orderError } = await supabase.rpc('place_shop_order', {

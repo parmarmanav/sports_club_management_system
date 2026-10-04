@@ -86,7 +86,7 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
     const { data: orderId, error } = await supabase.rpc('open_bar_tab', {
       p_table_id: table_id,
       p_member_id: member_id || null,
-      p_staff_id: req.user.id
+      p_staff_id: req.user.type === 'staff' ? req.user.id : null
     });
 
     if (error) {
@@ -153,7 +153,7 @@ router.post('/orders/:id/close', verifySupabaseToken, async (req, res) => {
     const { data: paymentId, error } = await supabase.rpc('close_bar_tab', {
       p_bar_order_id: id,
       p_payment_method: payment_method,
-      p_staff_id: req.user.id
+      p_staff_id: req.user.type === 'staff' ? req.user.id : null
     });
 
     if (error) {
