@@ -156,7 +156,35 @@ router.post('/:id/cancel', verifySupabaseToken, async (req, res) => {
 
 
 router.get('/', async (req, res) => {
-  const { data } = await supabase.from('bookings').select('*, members(full_name), staff(full_name)');
+  const { date, status } = req.query;
+
+  let query = supabase.from('bookings').select(`
+    *,
+    members(full_name),
+    staff(full_name),
+    court_slots(start_time, courts(name))
+  `).order('created_at', { ascending: false });
+
+  if (status) {
+    query = query.eq('status', status);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("Fetch bookings error", error);
+    return res.status(500).json({ success: false, message: 'DB Error' });
+  }
+
+  if (date) {
+    // Basic filtering on the application side since date functions vary
+    const targetDate = new Date(date).toISOString().split('T')[0];
+    const filtered = (data || []).filter(b => {
+      if (!b.court_slots || !b.court_slots.start_time) return false;
+      return b.court_slots.start_time.startsWith(targetDate);
+    });
+    return res.json({ success: true, data: filtered });
+  }
+
   res.json({ success: true, data: data || [] });
 });
 

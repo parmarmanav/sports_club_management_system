@@ -116,11 +116,11 @@ export default function BookingsPage() {
                           {capitalize(b.status)}
                         </span>
                       </td>
-                      <td className="px-3 py-3.5">
+                      <td className="px-3 py-3.5 text-right">
                         {b.status === 'confirmed' && (
                           <button onClick={() => handleCancel(b.id)}
-                            className="text-rose-400 hover:text-rose-600 transition-colors" title="Cancel booking">
-                            <XIcon className="w-4 h-4" />
+                            className="text-xs font-medium text-slate-400 hover:text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition-all">
+                            Cancel
                           </button>
                         )}
                       </td>
