@@ -112,7 +112,7 @@ router.get('/', async (req, res) => {
         start_time: slot.start_time,
         end_time: slot.end_time,
         is_social: slot.is_social || false,
-        is_available: available,
+        available: available,
         ...(slot.is_social && slot.max_players !== undefined && { max_players: slot.max_players }),
         ...(slot.is_social && slot.booked_players !== undefined && { booked_players: slot.booked_players }),
         ...(slot.is_social && slot.available_spots !== undefined && { available_spots: slot.available_spots })
