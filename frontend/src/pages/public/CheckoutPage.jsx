@@ -53,6 +53,12 @@ export default function CheckoutPage() {
   const handleConfirmPayment = async () => {
     setIsProcessing(true);
     try {
+      // Add missing quantity if needed
+      const finalOrderItems = orderItems.map(item => ({
+        ...item,
+        quantity: item.quantity || 1
+      }));
+
       // API call based on type
       if (type === 'court' && item) {
         await bookingsApi.create({
@@ -62,21 +68,34 @@ export default function CheckoutPage() {
           time: item.time,
           payment_method: paymentMethod
         });
-      } else if (type === 'shop' && orderItems.length > 0) {
+      } else if (type === 'shop' && finalOrderItems.length > 0) {
         await shopApi.checkout({
-          items: orderItems,
+          items: finalOrderItems,
           payment_method: paymentMethod,
           member_id: user ? user.id : null,
           channel: 'in_store',
           fulfilment_type: 'immediate',
           guest_name: user ? null : 'Guest',
         });
-      } else if (type === 'bar' && orderItems.length > 0) {
-        await barApi.openTab({
-          items: orderItems,
-          payment_method: paymentMethod,
+      } else if (type === 'bar' && finalOrderItems.length > 0) {
+        // Step 1: Open Tab
+        const openRes = await barApi.openTab({
+          table_id: location.state?.table_id || 't1', // default table if none
           member_id: user ? user.id : null,
-          table_id: location.state?.table_id || null,
+        });
+        const orderId = openRes.data.data.order_id;
+        
+        // Step 2: Add all items
+        for (const fItem of finalOrderItems) {
+          await barApi.addItem(orderId, {
+            menu_item_id: fItem.menu_item_id,
+            quantity: fItem.quantity,
+          });
+        }
+        
+        // Step 3: Close Tab and Pay
+        await barApi.closeTab(orderId, {
+          payment_method: paymentMethod,
         });
       } else {
         // Mock generic delay for anything else

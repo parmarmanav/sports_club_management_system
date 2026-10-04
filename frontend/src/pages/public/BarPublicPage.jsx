@@ -38,6 +38,7 @@ export default function BarPublicPage() {
       state: {
         type: 'bar',
         title: `Table ${selectedTable.table_number} Order`,
+        table_id: selectedTable.id,
         item: {
           menu_item_id: item.id,
           name: item.name,
