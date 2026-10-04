@@ -96,28 +96,27 @@ const AdminLayout = () => {
   };
 
   const SidebarContent = () => (
-    <>
+    <div className="flex flex-col h-full bg-[#0E1116] font-sans selection:bg-brand-accent/30">
       {/* Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-white/[0.06] shrink-0 hover:bg-white/[0.02] transition-colors">
-        <Link to="/" className="flex items-center gap-3" title="Back to main website">
-          <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center shadow-lg shadow-brand-accent/20">
-            <span className="text-white font-bold text-sm">CC</span>
+      <div className="h-14 flex items-center px-5 border-b border-[#1F242C] shrink-0">
+        <Link to="/" className="flex items-center gap-2.5 w-full" title="Back to main website">
+          <div className="w-6 h-6 bg-[#EDEDED] flex items-center justify-center rounded-[4px]">
+            <span className="text-[#0E1116] font-bold text-xs tracking-tight">CC</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-white tracking-wide uppercase leading-none mb-0.5">Champions Club</span>
-            <span className="text-[10px] text-slate-400 font-medium tracking-widest uppercase leading-none">Back to Site &rarr;</span>
+            <span className="text-[13px] font-semibold text-[#EDEDED] leading-none tracking-tight">Champions Club</span>
           </div>
         </Link>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto scrollbar-thin py-3 px-3">
+      <nav className="flex-1 overflow-y-auto scrollbar-thin py-3">
         {navigation.map((item, idx) => {
           if (item.section) {
             return (
-              <p key={idx} className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mt-5 mb-2 px-3 first:mt-2">
-                {item.section}
-              </p>
+              <div key={idx} className="mt-5 mb-1.5 px-5">
+                <span className="text-[11px] font-medium text-[#8A8F98]">{item.section}</span>
+              </div>
             );
           }
 
@@ -129,13 +128,13 @@ const AdminLayout = () => {
               key={item.name}
               to={item.href}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
+              className={`flex items-center gap-2.5 px-3 py-1.5 mx-2 rounded-md text-[13px] font-medium transition-colors ${
                 isActive
-                  ? 'bg-brand-accent/15 text-brand-accent-light font-medium'
-                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                  ? 'bg-[#1F242C] text-[#EDEDED]'
+                  : 'text-[#8A8F98] hover:text-[#EDEDED]'
               }`}
             >
-              <item.icon className="w-[18px] h-[18px] shrink-0" />
+              <item.icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
               <span>{item.name}</span>
             </Link>
           );
@@ -143,25 +142,25 @@ const AdminLayout = () => {
       </nav>
 
       {/* User / Logout */}
-      <div className="p-3 border-t border-white/[0.06] shrink-0">
-        <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium text-slate-300">
+      <div className="p-2 border-t border-[#1F242C] shrink-0 mt-auto">
+        <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-[#1F242C] transition-colors group">
+          <div className="w-6 h-6 rounded-full bg-[#2A303C] flex items-center justify-center text-[10px] font-semibold text-[#EDEDED]">
             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-200 truncate">{user?.name || 'Staff'}</p>
-            <p className="text-xs text-slate-500 capitalize">{user?.role?.replace('_', ' ') || 'No role'}</p>
+            <p className="text-[13px] font-medium text-[#EDEDED] truncate leading-tight">{user?.name || 'Staff'}</p>
+            <p className="text-[10px] text-[#8A8F98] capitalize leading-none">{user?.role?.replace('_', ' ') || 'No role'}</p>
           </div>
+          <button
+            onClick={(e) => { e.preventDefault(); handleLogout(); }}
+            className="text-[#8A8F98] opacity-0 group-hover:opacity-100 hover:text-rose-400 transition-all p-1"
+            title="Sign Out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 w-full text-slate-400 hover:text-rose-400 hover:bg-white/[0.04] rounded-lg transition-all duration-150 text-sm"
-        >
-          <LogOut className="w-[18px] h-[18px]" />
-          <span>Sign out</span>
-        </button>
       </div>
-    </>
+    </div>
   );
 
   return (
