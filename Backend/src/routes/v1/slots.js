@@ -78,33 +78,33 @@ router.get('/', async (req, res) => {
         if (b.status) {
           return !['cancelled', 'refunded', 'failed'].includes(b.status.toLowerCase());
         }
-        return true; 
+        return true;
       });
 
       let available = true;
 
       // Rule: normal slot is available when there is no confirmed booking
       if (!slot.is_social) {
-         available = confirmedBookings.length === 0;
+        available = confirmedBookings.length === 0;
       } else {
-         // Rule: If is_social = true, follow the existing database/business rule
-         // We check for fields that might indicate social play availability
-         if (slot.hasOwnProperty('is_available')) {
-            available = slot.is_available;
-         } else if (slot.hasOwnProperty('available_spots')) {
-            available = slot.available_spots > 0;
-         } else if (slot.hasOwnProperty('max_players')) {
-            const currentPlayers = slot.booked_players !== undefined ? slot.booked_players : confirmedBookings.length;
-            available = currentPlayers < slot.max_players;
-         } else {
-            // fallback if we can't determine explicitly
-            available = true; 
-         }
+        // Rule: If is_social = true, follow the existing database/business rule
+        // We check for fields that might indicate social play availability
+        if (slot.hasOwnProperty('is_available')) {
+          available = slot.is_available;
+        } else if (slot.hasOwnProperty('available_spots')) {
+          available = slot.available_spots > 0;
+        } else if (slot.hasOwnProperty('max_players')) {
+          const currentPlayers = slot.booked_players !== undefined ? slot.booked_players : confirmedBookings.length;
+          available = currentPlayers < slot.max_players;
+        } else {
+          // fallback if we can't determine explicitly
+          available = true;
+        }
       }
-      
+
       // Override if 'is_available' is explicitly returned from a view or table
       if (slot.hasOwnProperty('is_available') && !slot.is_social) {
-          available = slot.is_available;
+        available = slot.is_available;
       }
 
       courtsMap.get(courtId).slots.push({
@@ -121,12 +121,12 @@ router.get('/', async (req, res) => {
 
     // Sort slots by start_time for each court
     const courtsList = Array.from(courtsMap.values()).map(court => {
-       court.slots.sort((a, b) => {
-          if (a.start_time < b.start_time) return -1;
-          if (a.start_time > b.start_time) return 1;
-          return 0;
-       });
-       return court;
+      court.slots.sort((a, b) => {
+        if (a.start_time < b.start_time) return -1;
+        if (a.start_time > b.start_time) return 1;
+        return 0;
+      });
+      return court;
     });
 
     return res.json({

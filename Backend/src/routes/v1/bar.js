@@ -60,7 +60,7 @@ router.get('/tables', async (req, res) => {
     const formattedTables = tables.map(table => {
       // Find the open order for this table
       const openOrder = table.bar_orders ? table.bar_orders.find(o => o.status === 'open') : null;
-      
+
       const { bar_orders, ...tableInfo } = table;
       return {
         ...tableInfo,
@@ -78,7 +78,7 @@ router.get('/tables', async (req, res) => {
 router.post('/orders', verifySupabaseToken, async (req, res) => {
   try {
     const { table_id, member_id } = req.body;
-    
+
     if (!table_id) {
       return res.status(400).json({ success: false, message: 'table_id is required' });
     }
@@ -173,14 +173,14 @@ router.post('/orders/:id/close', verifySupabaseToken, async (req, res) => {
       .eq('id', id)
       .single();
 
-    res.json({ 
-      success: true, 
-      data: { 
+    res.json({
+      success: true,
+      data: {
         order_id: id,
         payment_id: paymentId,
         status: order?.status || 'closed',
         total_amount: order?.total
-      } 
+      }
     });
   } catch (error) {
     console.error('Error closing bar tab:', error);

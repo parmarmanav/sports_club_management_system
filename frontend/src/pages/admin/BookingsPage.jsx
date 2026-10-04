@@ -12,8 +12,19 @@ export default function BookingsPage() {
   const params = { date };
   if (statusFilter) params.status = statusFilter;
 
+  const location = require('react-router-dom').useLocation();
+  const dummyData = location.state?.dummyData;
+
   const { data, loading, refetch } = useApi(() => bookingsApi.getAll(params), [date, statusFilter]);
-  const bookings = data || [];
+  let bookings = data ? [...data] : [];
+
+  if (dummyData && !bookings.find(b => b.id === dummyData.id)) {
+    // Check if the dummy data matches the current date filter
+    const dummyDate = dummyData.court_slots?.start_time?.split('T')[0];
+    if (!date || date === dummyDate) {
+      bookings.unshift(dummyData);
+    }
+  }
 
   const shiftDate = (days) => {
     const d = new Date(date);
@@ -67,9 +78,8 @@ export default function BookingsPage() {
       <div className="flex gap-2 flex-wrap">
         {['', 'confirmed', 'cancelled', 'completed'].map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-              statusFilter === s ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-brand-border text-slate-500 hover:border-slate-300'
-            }`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${statusFilter === s ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-brand-border text-slate-500 hover:border-slate-300'
+              }`}>
             {s ? capitalize(s) : 'All'}
           </button>
         ))}

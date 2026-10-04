@@ -149,14 +149,26 @@ export default function NewBookingPage() {
                           <p className="text-sm font-bold text-slate-700">{court.court_name}</p>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                          {court.slots?.map(slot => {
+                          {court.slots?.map((slot, slotIndex) => {
                             const isSelected = selectedSlot?.id === slot.id;
                             const timeString = new Date(slot.start).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                            
+                            const isPast = new Date(slot.start) < new Date();
+                            
+                            const isTrulyAvailable = (idx) => {
+                              if (idx < 0 || idx >= court.slots.length) return false;
+                              const currentAvailable = court.slots[idx].is_available;
+                              const prevAvailable = idx > 0 ? court.slots[idx - 1].is_available : true;
+                              return currentAvailable && prevAvailable;
+                            };
+
+                            const isAvailableForBooking = isTrulyAvailable(slotIndex) && isTrulyAvailable(slotIndex + 1) && !isPast;
+
                             return (
-                              <button key={slot.id || slot.start} disabled={!slot.is_available}
+                              <button key={slot.id || slot.start} disabled={!isAvailableForBooking}
                                 onClick={() => { setSelectedSlot({ ...slot, court_name: court.court_name }); setStep(2); }}
                                 className={`relative px-4 py-3 rounded-xl text-sm font-bold border-2 transition-all hover-lift ${
-                                  !slot.is_available
+                                  !isAvailableForBooking
                                     ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-60 line-through'
                                     : isSelected
                                       ? 'border-brand-accent bg-brand-accent/10 text-brand-accent ring-4 ring-brand-accent/10'

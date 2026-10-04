@@ -171,7 +171,12 @@ router.get('/', verifySupabaseToken, async (req, res) => {
 
   // Filter by logged-in user if they are not staff
   if (req.user && req.user.type !== 'staff') {
-    query = query.eq('member_id', req.user.id);
+    if (req.user.id) {
+      query = query.eq('member_id', req.user.id);
+    } else {
+      // If no valid id is found, return empty results for safety
+      query = query.eq('member_id', '00000000-0000-0000-0000-000000000000');
+    }
   }
 
 

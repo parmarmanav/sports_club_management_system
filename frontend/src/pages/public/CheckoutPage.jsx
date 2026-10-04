@@ -9,10 +9,10 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Accept standard items or a single item from location state
   const { type = 'unknown', item = null, items = [], title = 'Checkout' } = location.state || {};
-  
+
   // Aggregate items
   const orderItems = items.length > 0 ? items : item ? [item] : [];
 
@@ -59,6 +59,9 @@ export default function CheckoutPage() {
         quantity: item.quantity || 1
       }));
 
+      let dummyData = null;
+      let targetRoute = '/';
+
       // API call based on type
       if (type === 'court' && item) {
         await bookingsApi.create({
@@ -68,6 +71,18 @@ export default function CheckoutPage() {
           time: item.time,
           payment_method: paymentMethod
         });
+        
+        targetRoute = '/app/bookings';
+        dummyData = {
+          id: 'temp-' + Date.now(),
+          court_slots: {
+            start_time: `${item.date}T${item.time}:00`,
+            courts: { name: item.court_name || 'Court' }
+          },
+          members: { full_name: user?.name || 'You' },
+          price_charged: total,
+          status: 'confirmed'
+        };
       } else if (type === 'shop' && finalOrderItems.length > 0) {
         await shopApi.checkout({
           items: finalOrderItems,
@@ -84,7 +99,7 @@ export default function CheckoutPage() {
           member_id: (user && user.role === 'member') ? (user.memberId || null) : null,
         });
         const orderId = openRes.data.order_id;
-        
+
         // Step 2: Add all items
         for (const fItem of finalOrderItems) {
           await barApi.addItem(orderId, {
@@ -92,7 +107,7 @@ export default function CheckoutPage() {
             quantity: fItem.quantity,
           });
         }
-        
+
         // Step 3: Close Tab and Pay
         await barApi.closeTab(orderId, {
           payment_method: paymentMethod,
@@ -101,9 +116,10 @@ export default function CheckoutPage() {
         // Mock generic delay for anything else
         await new Promise(r => setTimeout(r, 1000));
       }
+      
       setSuccess(true);
       setTimeout(() => {
-        navigate(type === 'court' ? '/app/bookings' : '/');
+        navigate(targetRoute, { state: { dummyData } });
       }, 2000);
     } catch (err) {
       alert("Payment failed: " + (err.response?.data?.message || err.message || JSON.stringify(err)));
@@ -115,6 +131,8 @@ export default function CheckoutPage() {
   if (orderItems.length === 0) return null;
 
   if (success) {
+    const dummyInfo = location.state?.dummyData || null;
+
     return (
       <div className="min-h-screen bg-brand-surface pt-32 pb-20 flex items-center justify-center">
         <div className="text-center">
@@ -122,7 +140,26 @@ export default function CheckoutPage() {
             <CheckCircle className="w-10 h-10 text-emerald-600" />
           </div>
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Payment Successful!</h2>
-          <p className="text-slate-500">Your order has been confirmed. Redirecting...</p>
+          <p className="text-slate-500 mb-6">Your order has been confirmed.</p>
+          
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm inline-block text-left mb-6 min-w-[300px]">
+             <h3 className="text-lg font-bold text-slate-800 border-b pb-3 mb-3">Order Summary</h3>
+             {orderItems.map((oi, idx) => (
+               <div key={idx} className="flex justify-between items-center mb-2">
+                 <div>
+                   <p className="font-semibold text-slate-700">{oi.title || oi.name || oi.court_name || 'Item'}</p>
+                   {oi.time && <p className="text-xs text-slate-500">{oi.date} at {oi.time}</p>}
+                 </div>
+                 <p className="font-bold text-slate-800">₹{oi.price || 0}</p>
+               </div>
+             ))}
+             <div className="flex justify-between items-center pt-3 mt-3 border-t">
+               <p className="font-bold text-slate-600">Total Paid</p>
+               <p className="font-bold text-emerald-600 text-lg">₹{total}</p>
+             </div>
+          </div>
+
+          <p className="text-sm text-slate-400">Redirecting...</p>
         </div>
       </div>
     );
@@ -137,16 +174,16 @@ export default function CheckoutPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* LEFT COL: Order Details & Payment */}
           <div className="lg:col-span-2 space-y-6">
-            
+
             {/* Membership Status Box */}
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Membership Status</h3>
-                  <button 
+                  <button
                     onClick={() => setShowMembershipInfo(!showMembershipInfo)}
                     className="flex items-center gap-2 hover-lift transition-all text-left"
                   >
@@ -213,30 +250,27 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <button
                   onClick={() => setPaymentMethod('upi')}
-                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                    paymentMethod === 'upi' ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100'
-                  }`}
+                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'upi' ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100'
+                    }`}
                 >
                   <Smartphone className="w-6 h-6" />
                   <span className="text-sm font-bold">UPI / Wallet</span>
                 </button>
                 <button
                   onClick={() => setPaymentMethod('card')}
-                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                    paymentMethod === 'card' ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100'
-                  }`}
+                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'card' ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100'
+                    }`}
                 >
                   <CreditCard className="w-6 h-6" />
                   <span className="text-sm font-bold">Credit/Debit Card</span>
                 </button>
-                
+
                 {/* Cash option ONLY for staff */}
                 {user?.role === 'staff' ? (
                   <button
                     onClick={() => setPaymentMethod('cash')}
-                    className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                      paymentMethod === 'cash' ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100'
-                    }`}
+                    className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'cash' ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100'
+                      }`}
                   >
                     <Banknote className="w-6 h-6" />
                     <span className="text-sm font-bold">Cash (Staff)</span>
@@ -244,7 +278,7 @@ export default function CheckoutPage() {
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-slate-100 bg-slate-50/50 text-slate-400 opacity-60 cursor-not-allowed" title="Cash payments must be processed by staff at the front desk">
                     <Banknote className="w-6 h-6" />
-                    <span className="text-xs font-bold text-center">Cash <br/>(Front Desk Only)</span>
+                    <span className="text-xs font-bold text-center">Cash <br />(Front Desk Only)</span>
                   </div>
                 )}
               </div>
@@ -256,9 +290,9 @@ export default function CheckoutPage() {
           <div className="space-y-6">
             <div className="bg-slate-900 rounded-2xl p-6 shadow-xl text-white relative overflow-hidden">
               <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-accent/20 rounded-full blur-3xl"></div>
-              
+
               <h3 className="text-lg font-bold mb-6">Order Summary</h3>
-              
+
               <div className="space-y-4 mb-6 relative z-10">
                 {orderItems.map((oi, i) => (
                   <div key={i} className="flex justify-between items-start text-sm">
@@ -276,14 +310,14 @@ export default function CheckoutPage() {
                   <span>Subtotal</span>
                   <span>₹{subtotal.toFixed(2)}</span>
                 </div>
-                
+
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-sm text-emerald-400 font-medium">
                     <span>Member Discount ({discountRate * 100}%)</span>
                     <span>-₹{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
-                
+
                 <div className="flex justify-between text-xl font-bold pt-2 border-t border-slate-700">
                   <span>Total</span>
                   <div className="text-right">
@@ -295,8 +329,8 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <button 
-                onClick={handleConfirmPayment} 
+              <button
+                onClick={handleConfirmPayment}
                 disabled={isProcessing}
                 className="w-full mt-8 bg-brand-accent text-white py-4 rounded-xl font-bold hover:bg-brand-accent-light transition-all hover-lift hover-glow flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed relative z-10"
               >
@@ -304,9 +338,9 @@ export default function CheckoutPage() {
                 {!isProcessing && <ArrowRight className="w-5 h-5" />}
               </button>
             </div>
-            
+
             <p className="text-xs text-center text-slate-400">
-              Payments are secured and encrypted. <br/>By proceeding, you agree to our Terms of Service.
+              Payments are secured and encrypted. <br />By proceeding, you agree to our Terms of Service.
             </p>
           </div>
 

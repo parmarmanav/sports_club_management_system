@@ -34,7 +34,7 @@ router.get('/products', async (req, res) => {
     if (in_stock === 'true') {
       query = query.gt('stock_qty', 0);
     }
-    
+
     if (category_id) {
       query = query.eq('category_id', category_id);
     }
@@ -63,7 +63,7 @@ router.patch('/products/:id/stock', verifySupabaseToken, authorizeRoles('admin',
     // Since we don't have a specific stock increment RPC, we'll read current stock and update.
     // Alternatively we can use a direct rpc, but let's do a simple read/write (though not perfectly atomic without RPC)
     // Actually, in Supabase, without an RPC, atomic increment can be tricky. Let's do read then write.
-    
+
     const { data: product, error: fetchError } = await supabase
       .from('products')
       .select('stock_qty')
@@ -88,7 +88,7 @@ router.patch('/products/:id/stock', verifySupabaseToken, authorizeRoles('admin',
       .single();
 
     if (updateError) throw updateError;
-    
+
     res.json({ success: true, data: updatedProduct });
   } catch (error) {
     console.error('Error adjusting stock:', error);
@@ -98,11 +98,11 @@ router.patch('/products/:id/stock', verifySupabaseToken, authorizeRoles('admin',
 // 4. Create Order / Checkout
 router.post('/orders', verifySupabaseToken, async (req, res) => {
   try {
-    const { 
-      items, 
-      payment_method, 
-      member_id, 
-      channel = 'in_store', 
+    const {
+      items,
+      payment_method,
+      member_id,
+      channel = 'in_store',
       fulfilment_type = 'immediate',
       delivery_address,
       guest_name,
@@ -114,7 +114,7 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty or invalid format' });
     }
-    
+
     for (const item of items) {
       if (!item.product_id || !item.quantity || item.quantity <= 0) {
         return res.status(400).json({ success: false, message: 'Invalid product or quantity in cart' });
@@ -142,7 +142,7 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
 
     if (orderError) {
       console.error('Order creation error:', orderError);
-      
+
       // Handle known RPC exceptions mapped by PostgreSQL ERRCODE or message
       if (orderError.message.includes('OUT_OF_STOCK')) {
         return res.status(409).json({ success: false, message: 'One or more items are out of stock' });
@@ -150,7 +150,7 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
       if (orderError.message.includes('PRODUCT_NOT_FOUND')) {
         return res.status(404).json({ success: false, message: 'One or more products were not found' });
       }
-      
+
       throw orderError;
     }
 
@@ -184,8 +184,8 @@ router.post('/orders', verifySupabaseToken, async (req, res) => {
       throw paymentError;
     }
 
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       data: {
         order_id: orderId,
         payment_id: paymentId,
