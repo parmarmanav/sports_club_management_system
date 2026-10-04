@@ -75,7 +75,7 @@ router.post('/', verifySupabaseToken, async (req, res) => {
         .single();
 
       if (!fetchError && bookingRecord) {
-        bookingAmount = bookingRecord.amount ?? bookingRecord.total_amount ?? bookingRecord.price;
+        bookingAmount = bookingRecord.price_charged ?? bookingRecord.amount ?? bookingRecord.total_amount ?? bookingRecord.price;
       }
     }
 
