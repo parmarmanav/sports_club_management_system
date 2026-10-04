@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { CreditCard, Smartphone, Banknote, ShieldCheck, ArrowRight, ShieldAlert, Sparkles, CheckCircle } from 'lucide-react';
 import { bookingsApi } from '../../api/bookings';
-
+import { shopApi } from '../../api/shop';
+import { barApi } from '../../api/bar';
 export default function CheckoutPage() {
   const { user } = useAuth();
   const location = useLocation();
@@ -52,7 +53,7 @@ export default function CheckoutPage() {
   const handleConfirmPayment = async () => {
     setIsProcessing(true);
     try {
-      // Simulate API call based on type
+      // API call based on type
       if (type === 'court' && item) {
         await bookingsApi.create({
           court_id: item.court_id,
@@ -61,8 +62,24 @@ export default function CheckoutPage() {
           time: item.time,
           payment_method: paymentMethod
         });
+      } else if (type === 'shop' && orderItems.length > 0) {
+        await shopApi.checkout({
+          items: orderItems,
+          payment_method: paymentMethod,
+          member_id: user ? user.id : null,
+          channel: 'in_store',
+          fulfilment_type: 'immediate',
+          guest_name: user ? null : 'Guest',
+        });
+      } else if (type === 'bar' && orderItems.length > 0) {
+        await barApi.openTab({
+          items: orderItems,
+          payment_method: paymentMethod,
+          member_id: user ? user.id : null,
+          table_id: location.state?.table_id || null,
+        });
       } else {
-        // Mock generic delay for shop/bar
+        // Mock generic delay for anything else
         await new Promise(r => setTimeout(r, 1000));
       }
       setSuccess(true);
@@ -70,7 +87,7 @@ export default function CheckoutPage() {
         navigate(type === 'court' ? '/app/bookings' : '/');
       }, 2000);
     } catch (err) {
-      alert("Payment failed: " + (err.message || JSON.stringify(err)));
+      alert("Payment failed: " + (err.response?.data?.message || err.message || JSON.stringify(err)));
     } finally {
       setIsProcessing(false);
     }
