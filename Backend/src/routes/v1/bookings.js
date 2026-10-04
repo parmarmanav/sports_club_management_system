@@ -155,7 +155,7 @@ router.post('/:id/cancel', verifySupabaseToken, async (req, res) => {
 });
 
 
-router.get('/', async (req, res) => {
+router.get('/', verifySupabaseToken, async (req, res) => {
   const { date, status } = req.query;
 
   let query = supabase.from('bookings').select(`
@@ -168,6 +168,12 @@ router.get('/', async (req, res) => {
   if (status) {
     query = query.eq('status', status);
   }
+
+  // Filter by logged-in user if they are not staff
+  if (req.user && req.user.type !== 'staff') {
+    query = query.eq('member_id', req.user.id);
+  }
+
 
   const { data, error } = await query;
   if (error) {
